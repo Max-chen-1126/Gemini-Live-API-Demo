@@ -376,4 +376,9 @@ video {
 
 .function-response-display {
   color: rgb(158, 240, 158);
-} 
+}
+
+.interim {
+  color: #aaa;
+  font-style: italic;
+}

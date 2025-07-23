@@ -29,7 +29,7 @@
 <body>
   <div class="container">
     <h1>Live API Demo</h1>
-    <p>對著您的麥克風說話，並可選擇分享您的網路攝影機或螢幕，進行對話。</p>
+    <p>使用方式 : 可以通過打字或對著麥克風說話，並可選擇分享網路攝影機或螢幕。</p>
   </div>
 
   <div class="input-container">
@@ -82,6 +82,12 @@
     let hasShownSpeakingMessage = false;
     let currentTurn = 0;
     let lastAudioTurn = -1;
+    
+    // Transcription management
+    let inputTranscriptionBuffer = '';
+    let outputTranscriptionBuffer = '';
+    let currentInputTranscriptionId = null;
+    let currentOutputTranscriptionId = null;
 
     // Initialize media handler
     mediaHandler.initialize(document.getElementById('videoPreview'));
@@ -118,6 +124,19 @@
       api.isSpeaking = false;  // Reset speaking state
       audioStreamer.complete();
       document.getElementById('interruptButton').style.display = 'none';
+      
+      // Finalize any remaining transcriptions
+      if (currentOutputTranscriptionId && outputTranscriptionBuffer) {
+        console.log('Finalizing output transcription on turn complete:', outputTranscriptionBuffer);
+        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', false, 'output');
+        outputTranscriptionBuffer = '';
+      }
+      
+      if (currentInputTranscriptionId && inputTranscriptionBuffer) {
+        console.log('Finalizing input transcription on turn complete:', inputTranscriptionBuffer);
+        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', false, 'input');
+        inputTranscriptionBuffer = '';
+      }
     };
 
     // Add interruption handler
@@ -145,6 +164,44 @@
       logMessage('API Response: ' + JSON.stringify(data, null, 2));
     };
 
+    api.onInputTranscription = (data) => {
+      console.log('Input transcription callback called with data:', data);
+      // Handle null is_final as interim (not final)
+      const isInterim = data.is_final === null || data.is_final === false;
+      
+      if (isInterim) {
+        // Accumulate transcription text
+        inputTranscriptionBuffer += data.text;
+        console.log('Accumulated input transcription:', inputTranscriptionBuffer);
+        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', true, 'input');
+      } else {
+        // Final transcription
+        inputTranscriptionBuffer += data.text;
+        console.log('Final input transcription:', inputTranscriptionBuffer);
+        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', false, 'input');
+        inputTranscriptionBuffer = ''; // Reset buffer
+      }
+    };
+
+    api.onOutputTranscription = (data) => {
+      console.log('Output transcription callback called with data:', data);
+      // Handle null is_final as interim (not final)
+      const isInterim = data.is_final === null || data.is_final === false;
+      
+      if (isInterim) {
+        // Accumulate transcription text
+        outputTranscriptionBuffer += data.text;
+        console.log('Accumulated output transcription:', outputTranscriptionBuffer);
+        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', true, 'output');
+      } else {
+        // Final transcription
+        outputTranscriptionBuffer += data.text;
+        console.log('Final output transcription:', outputTranscriptionBuffer);
+        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', false, 'output');
+        outputTranscriptionBuffer = ''; // Reset buffer
+      }
+    };
+
     // UI Event Handlers
     async function startRecording() {
       try {
@@ -153,6 +210,10 @@
           audioStreamer.stop();
           api.isSpeaking = false;
         }
+
+        // Reset input transcription buffer for new recording
+        inputTranscriptionBuffer = '';
+        currentInputTranscriptionId = null;
 
         await audioContext.resume();
         await audioRecorder.start();
@@ -216,6 +277,109 @@
       output.scrollTop = output.scrollHeight;
     }
 
+    function logAccumulatedTranscription(message, className, isInterim, transcriptionType) {
+      console.log('logAccumulatedTranscription called with:', {message, className, isInterim, transcriptionType});
+      
+      const container = document.getElementById('output');
+      const transcriptionId = transcriptionType === 'input' ? currentInputTranscriptionId : currentOutputTranscriptionId;
+      
+      // Find existing transcription element by ID
+      let messageElement = transcriptionId ? document.getElementById(transcriptionId) : null;
+      
+      if (isInterim) {
+        console.log('Processing interim transcription');
+        if (!messageElement) {
+            console.log('Creating new interim transcription element');
+            messageElement = document.createElement('p');
+            messageElement.className = className + ' interim';
+            
+            // Generate unique ID for this transcription sequence
+            const newId = `transcription-${transcriptionType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            messageElement.id = newId;
+            
+            // Store the ID for future updates
+            if (transcriptionType === 'input') {
+              currentInputTranscriptionId = newId;
+            } else {
+              currentOutputTranscriptionId = newId;
+            }
+            
+            container.appendChild(messageElement);
+        } else {
+            console.log('Updating existing interim transcription element');
+        }
+        messageElement.textContent = message;
+        console.log('Set interim transcription text to:', message);
+      } else {
+        console.log('Processing final transcription');
+        if (messageElement) {
+            console.log('Finalizing existing transcription element');
+            messageElement.textContent = message;
+            messageElement.classList.remove('interim');
+            messageElement.classList.add('final');
+        } else {
+            console.log('Creating new final transcription element');
+            const finalElement = document.createElement('p');
+            finalElement.className = className + ' final';
+            finalElement.textContent = message;
+            container.appendChild(finalElement);
+        }
+        
+        // Reset the transcription ID
+        if (transcriptionType === 'input') {
+          currentInputTranscriptionId = null;
+        } else {
+          currentOutputTranscriptionId = null;
+        }
+      }
+      
+      container.scrollTop = container.scrollHeight;
+      console.log('Accumulated transcription element processed successfully');
+    }
+
+    // Keep the old function for backward compatibility
+    function logTranscription(message, className, isInterim) {
+      console.log('logTranscription called with:', {message, className, isInterim});
+      
+      const container = document.getElementById('output');
+      const interimSelector = `.interim.${className}`;
+      let messageElement = isInterim ? container.querySelector(interimSelector) : null;
+      
+      console.log('Container:', container, 'InterimSelector:', interimSelector, 'Existing element:', messageElement);
+
+      if (isInterim) {
+        console.log('Processing interim transcription');
+        if (!messageElement) {
+            console.log('Creating new interim element');
+            messageElement = document.createElement('p');
+            messageElement.className = className + ' interim';
+            container.appendChild(messageElement);
+        } else {
+            console.log('Using existing interim element');
+        }
+        messageElement.textContent = message;
+        console.log('Set interim element text to:', message);
+      } else {
+        console.log('Processing final transcription');
+        const interimElement = container.querySelector(interimSelector);
+        console.log('Found interim element for finalization:', interimElement);
+        if (interimElement) {
+            console.log('Updating existing interim element to final');
+            interimElement.textContent = message;
+            interimElement.classList.remove('interim');
+        } else {
+            console.log('Creating new final element');
+            // If a final result comes without an interim one, just log it.
+            const finalElement = document.createElement('p');
+            finalElement.className = className;
+            finalElement.textContent = message;
+            container.appendChild(finalElement);
+        }
+      }
+      container.scrollTop = container.scrollHeight;
+      console.log('Transcription element added/updated successfully');
+    }
+
     // Add function to send text message
     function sendTextMessage() {
       const textInput = document.getElementById('textInput');
@@ -224,6 +388,10 @@
 
       // Clear input
       textInput.value = '';
+
+      // Reset output transcription buffer for new response
+      outputTranscriptionBuffer = '';
+      currentOutputTranscriptionId = null;
 
       // Log user message
       logMessage('You: ' + text);
@@ -285,7 +453,7 @@
       }
     };
 
-    // Add CSS for interrupted message
+    // Add CSS for interrupted message and transcription states
     const style = document.createElement('style');
     style.textContent = `
       .interrupted-message {
@@ -295,6 +463,46 @@
         padding: 4px 8px;
         border-left: 3px solid #ff6b6b;
         background-color: rgba(255, 107, 107, 0.1);
+      }
+      
+      /* Transcription styles */
+      .interim {
+        color: #999;
+        font-style: italic;
+        opacity: 0.8;
+        position: relative;
+      }
+      
+      .interim::after {
+        content: '...';
+        animation: blink 1s infinite;
+      }
+      
+      .final {
+        color: inherit;
+        font-style: normal;
+        opacity: 1;
+      }
+      
+      .user-message.interim {
+        color: #666;
+      }
+      
+      .gemini-message.interim {
+        color: #8e44ad;
+      }
+      
+      .user-message.final {
+        color: #333;
+      }
+      
+      .gemini-message.final {
+        color: #6200ee;
+      }
+      
+      @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
       }
     `;
     document.head.appendChild(style);

@@ -67,13 +67,13 @@ logger.info(f"System instructions: {SYSTEM_INSTRUCTIONS}")
 CONFIG = {
     "generation_config": {
         "response_modalities": ["AUDIO"],
-        "input_audio_transcription": {},
-        "output_audio_transcription": {},
         "speech_config": {
             "voice_config": {"prebuilt_voice_config": {"voice_name": "Kore"}},
             "language_code": "cmn-CN",
         },
     },
+    "input_audio_transcription": {},
+    "output_audio_transcription": {},
     "tools": [{"google_search": {}}],
     "system_instruction": SYSTEM_INSTRUCTIONS,
 }

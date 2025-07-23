@@ -124,3 +124,8 @@ body {
     outline: none;
     border-color: #6200ee;
   }
+
+.interim {
+  color: #999;
+  font-style: italic;
+}

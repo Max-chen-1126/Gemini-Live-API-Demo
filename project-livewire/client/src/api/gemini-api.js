@@ -33,6 +33,8 @@ export class GeminiAPI {
         this.onFunctionCall = () => {};
         this.onFunctionResponse = () => {};
         this.onInterrupted = () => {};  // New callback for interruption events
+        this.onInputTranscription = () => {};
+        this.onOutputTranscription = () => {};
         
         this.setupWebSocket();
     }
@@ -87,6 +89,16 @@ export class GeminiAPI {
                 } else if (response.type === 'function_response') {
                     console.log('Received function response:', response.data);
                     this.onFunctionResponse(response.data);
+                } else if (response.type === 'input_transcription') {
+                    console.log('Received input transcription:', response.data);
+                    console.log('Input transcription details - text:', response.data.text, 'is_final:', response.data.is_final);
+                    console.log('Calling onInputTranscription callback...');
+                    this.onInputTranscription(response.data);
+                } else if (response.type === 'output_transcription') {
+                    console.log('Received output transcription:', response.data);
+                    console.log('Output transcription details - text:', response.data.text, 'is_final:', response.data.is_final);
+                    console.log('Calling onOutputTranscription callback...');
+                    this.onOutputTranscription(response.data);
                 } else {
                     console.log('Received unknown message type:', response);
                 }

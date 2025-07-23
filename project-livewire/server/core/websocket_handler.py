@@ -199,6 +199,15 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
                         )
                     logger.debug(f"Received response from Gemini: {debug_response}")
 
+                    # Log what attributes are available in server_content for debugging
+                    server_content_attrs = [attr for attr in dir(response.server_content) if not attr.startswith('_')]
+                    logger.debug(f"Server content attributes: {server_content_attrs}")
+                    
+                    # Check for transcription attributes specifically
+                    has_input_transcription = hasattr(response.server_content, "input_transcription") and response.server_content.input_transcription
+                    has_output_transcription = hasattr(response.server_content, "output_transcription") and response.server_content.output_transcription
+                    logger.debug(f"Has input_transcription: {has_input_transcription}, Has output_transcription: {has_output_transcription}")
+                    
                     # Process server content (including audio) immediately
                     await process_server_content(
                         websocket, session, response.server_content
@@ -230,6 +239,40 @@ async def process_server_content(
         )
         session.is_receiving_response = False
         return
+
+    # Handle input transcription
+    if (
+        hasattr(server_content, "input_transcription")
+        and server_content.input_transcription
+    ):
+        transcription = server_content.input_transcription
+        logger.info(f"Input transcription received - text: '{transcription.text}', is_final: {transcription.finished}")
+        transcription_data = {
+            "type": "input_transcription",
+            "data": {
+                "text": transcription.text,
+                "is_final": transcription.finished,
+            },
+        }
+        logger.info(f"Sending input transcription to client: {json.dumps(transcription_data)}")
+        await websocket.send(json.dumps(transcription_data))
+
+    # Handle output transcription
+    if (
+        hasattr(server_content, "output_transcription")
+        and server_content.output_transcription
+    ):
+        transcription = server_content.output_transcription
+        logger.info(f"Output transcription received - text: '{transcription.text}', is_final: {transcription.finished}")
+        transcription_data = {
+            "type": "output_transcription",
+            "data": {
+                "text": transcription.text,
+                "is_final": transcription.finished,
+            },
+        }
+        logger.info(f"Sending output transcription to client: {json.dumps(transcription_data)}")
+        await websocket.send(json.dumps(transcription_data))
 
     if server_content.model_turn:
         session.received_model_response = True

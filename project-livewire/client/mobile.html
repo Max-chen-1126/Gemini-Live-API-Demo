@@ -255,6 +255,14 @@
       functionInfo.innerHTML = `<pre><span class="function-name-display">Function: ${data.name}</span>\n<span class="function-params-display">Parameters: ${JSON.stringify(data.args, null, 2)}</span></pre>`;
     };
 
+    api.onInputTranscription = (data) => {
+      logTranscription(data.text, 'user-message', !data.is_final);
+    };
+
+    api.onOutputTranscription = (data) => {
+      logTranscription(`Gemini: ${data.text}`, 'gemini-message', !data.is_final);
+    };
+
     api.onFunctionResponse = (data) => {
       const functionInfo = document.getElementById('functionInfo');
       // Stringify the response data
@@ -374,6 +382,34 @@
       messageElement.textContent = message;
       output.appendChild(messageElement);
       output.scrollTop = output.scrollHeight;
+    }
+
+    function logTranscription(message, className, isInterim) {
+      const container = document.getElementById('output');
+      const interimSelector = `.interim.${className}`;
+      let messageElement = isInterim ? container.querySelector(interimSelector) : null;
+
+      if (isInterim) {
+        if (!messageElement) {
+            messageElement = document.createElement('p');
+            messageElement.className = className + ' interim';
+            container.appendChild(messageElement);
+        }
+        messageElement.textContent = message;
+      } else {
+        const interimElement = container.querySelector(interimSelector);
+        if (interimElement) {
+            interimElement.textContent = message;
+            interimElement.classList.remove('interim');
+        } else {
+            // If a final result comes without an interim one, just log it.
+            const finalElement = document.createElement('p');
+            finalElement.className = className;
+            finalElement.textContent = message;
+            container.appendChild(finalElement);
+        }
+      }
+      container.scrollTop = container.scrollHeight;
     }
 
     // Remove references to interruptButton and muteButton
