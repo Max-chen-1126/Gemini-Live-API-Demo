@@ -42,9 +42,7 @@ class ApiConfig:
         """Initialize API credentials."""
         self.api_key = os.getenv("GOOGLE_API_KEY")
         if not self.api_key:
-            raise ConfigurationError(
-                "GOOGLE_API_KEY environment variable is required"
-            )
+            raise ConfigurationError("GOOGLE_API_KEY environment variable is required")
 
 
 # Initialize API configuration
@@ -69,6 +67,8 @@ logger.info(f"System instructions: {SYSTEM_INSTRUCTIONS}")
 CONFIG = {
     "generation_config": {
         "response_modalities": ["AUDIO"],
+        "input_audio_transcription": {},
+        "output_audio_transcription": {},
         "speech_config": {
             "voice_config": {"prebuilt_voice_config": {"voice_name": "Kore"}},
             "language_code": "cmn-CN",
