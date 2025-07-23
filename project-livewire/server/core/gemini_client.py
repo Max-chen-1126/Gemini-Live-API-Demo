@@ -17,7 +17,6 @@ Gemini client initialization and connection management
 """
 
 import logging
-import os
 
 from config.config import CONFIG, MODEL, ConfigurationError, api_config
 from google import genai
@@ -31,38 +30,14 @@ async def create_gemini_session():
         # Initialize authentication
         await api_config.initialize()
 
-        if api_config.use_vertex:
-            # Vertex AI configuration
-            location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
-            project_id = os.environ.get("GOOGLE_CLOUD_PROJECT")
-
-            if not project_id:
-                raise ConfigurationError(
-                    "GOOGLE_CLOUD_PROJECT is required for Vertex AI"
-                )
-
-            logger.info(
-                f"Initializing Vertex AI client with location: {location}, project: {project_id}"
-            )
-
-            # Initialize Vertex AI client
-            client = genai.Client(
-                vertexai=True,
-                location=location,
-                project=project_id,
-                # http_options={'api_version': 'v1beta'}
-            )
-            logger.info(f"Vertex AI client initialized with client: {client}")
-        else:
-            # Development endpoint configuration
-            logger.info("Initializing development endpoint client")
-
-            # Initialize development client
-            client = genai.Client(
-                vertexai=False,
-                http_options={"api_version": "v1alpha"},
-                api_key=api_config.api_key,
-            )
+        # Initialize development client with Google AI Studio API Key
+        logger.info("Initializing Google AI Studio client")
+        
+        client = genai.Client(
+            vertexai=False,
+            http_options={"api_version": "v1alpha"},
+            api_key=api_config.api_key,
+        )
 
         # Create the session
         session = client.aio.live.connect(model=MODEL, config=CONFIG)

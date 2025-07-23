@@ -16,7 +16,6 @@
 Session management for Gemini Multimodal Live Proxy Server
 """
 
-import asyncio
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 
@@ -27,7 +26,6 @@ class SessionState:
 
     is_receiving_response: bool = False
     interrupted: bool = False
-    current_tool_execution: Optional[asyncio.Task] = None
     current_audio_stream: Optional[Any] = None
     genai_session: Optional[Any] = None
     received_model_response: bool = (

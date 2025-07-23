@@ -12,25 +12,18 @@ This project builds upon the concepts from the [Gemini Multimodal Live API Devel
 *   **👁️ Multimodal Input:** Combines voice, text, webcam video, and screen sharing.
 *   **🔊 Streamed Audio Output:** Hear responses instantly as they are generated.
 *   **↩️ Interruptible:** Talk over the AI, just like a real conversation.
-*   **🛠️ Integrated Tools:** Ask about the weather or check your calendar (via Cloud Functions).
+*   **🔍 Google Search:** Get real-time information with built-in Google Search.
 *   **📱 Responsive UI:** Includes both a development interface and a mobile-optimized view.
-*   **☁️ Cloud Ready:** Designed for easy deployment to Google Cloud Run.
 
 <!-- Optional: Add a GIF/Video Demo Here -->
 <!-- ![Demo GIF](assets/livewire-demo.gif) -->
 
 ## 🚀 Getting Started
 
-Choose your path: run locally for development or deploy straight to the cloud.
-
 **Prerequisites:**
 
 *   Python 3.8+
-*   API Keys:
-    *   Google Gemini API Key ([Get one here](https://makersuite.google.com/app/apikey))
-    *   OpenWeather API Key ([Get one here](https://openweathermap.org/api) - for weather tool)
-*   Google Cloud SDK (`gcloud` CLI) (Recommended for cloud deployment & secrets)
-*   Deployed Tool Functions (See [Cloud Functions Guide](./cloud-functions/README.md))
+*   Google Gemini API Key ([Get one here](https://makersuite.google.com/app/apikey))
 
 ---
 
@@ -47,11 +40,8 @@ These are the basic steps. For more detailed instructions, see the **[Local Setu
 2.  **Configure Backend:**
     ```bash
     cd server
-    cp .env.example .env
-    nano .env # Edit with your API keys & Function URLs
-    # --> See server/README.md for detailed .env options <--
+    echo "GOOGLE_API_KEY=your_api_key_here" > .env
     ```
-    *   *Minimum required in `.env`:* `GOOGLE_API_KEY` (if not using Vertex/ADC), `WEATHER_FUNCTION_URL`, etc.
 
 3.  **Run Backend:**
     ```bash
@@ -71,60 +61,22 @@ These are the basic steps. For more detailed instructions, see the **[Local Setu
     *   Dev UI: `http://localhost:8000/index.html`
     *   Mobile UI: `http://localhost:8000/mobile.html`
 
----
-
-### 2. ☁️ Deploy to Google Cloud Run
-
-This uses Cloud Build to containerize and deploy the client & server. For more detailed step-by-step instructions, refer to the **[Cloud Deployment Guide](./docs/cloud_deployment.md)**.
-
-1.  **Setup Google Cloud:**
-    *   Set your project: `gcloud config set project YOUR_GOOGLE_CLOUD_PROJECT`
-    *   Enable APIs (Run, Cloud Build, Secret Manager, etc.).
-    *   Create Secrets (`GOOGLE_API_KEY`, `OPENWEATHER_API_KEY`) in Secret Manager.
-    *   Create a Service Account (`livewire-backend`) with Secret Accessor role.
-    *   Deploy Tool Functions (See [Cloud Functions Guide](./cloud-functions/README.md)).
-
-2.  **Deploy Backend:**
-    ```bash
-    # Make sure GOOGLE_CLOUD_PROJECT is set in your environment or cloudbuild.yaml
-    gcloud builds submit --config server/cloudbuild.yaml
-    ```
-
-3.  **Get Backend URL:** Note the URL output by the previous command (or use `gcloud run services describe livewire-backend...`). Let's call it `YOUR_BACKEND_URL`.
-
-4.  **Deploy Frontend:**
-    ```bash
-    # Pass the backend URL to the frontend build
-    gcloud builds submit --config client/cloudbuild.yaml --substitutions=_BACKEND_URL=YOUR_BACKEND_URL
-    ```
-    *(Note: Ensure client code uses the provided `_BACKEND_URL` instead of localhost. See `docs/cloud_deployment.md` for details).*
-
-5.  **Access:** Get the frontend service URL (`gcloud run services describe livewire-ui...`) and open it in your browser.
-
----
 
 ## 🏗️ Architecture Overview
 
 Project Livewire consists of:
 
-1.  **Client (`client/`):** Vanilla JS frontend handling UI, media capture, and WebSocket connection. ([Details](./client/README.md))
-2.  **Server (`server/`):** Python WebSocket server proxying to Gemini, managing sessions, and calling tools. ([Details](./server/README.md))
-3.  **Tools (`cloud-functions/`):** Google Cloud Functions providing external capabilities (weather, calendar). ([Details](./cloud-functions/README.md))
-4.  **Gemini API:** Google's multimodal AI model accessed via the Live API.
+1.  **Client (`client/`):** Vanilla JS frontend handling UI, media capture, and WebSocket connection.
+2.  **Server (`server/`):** Python WebSocket server proxying to Gemini and managing sessions.
+3.  **Gemini API:** Google's multimodal AI model accessed via the Live API with Google Search grounding.
 
 ![Architecture Diagram](assets/architecture.png)
-*(User -> Client -> Server -> Gemini API / Tools -> Server -> Client -> User)*
-
-## 🔧 Tools & Configuration
-
-*   Tools like weather and calendar are implemented as separate Cloud Functions for modularity. See the [Cloud Functions README](./cloud-functions/README.md) for setup.
-*   Server configuration (API keys, Function URLs) is managed via environment variables and Google Cloud Secret Manager. See the [Server README](./server/README.md#configuration) for details.
+*(User -> Client -> Server -> Gemini API with Google Search -> Server -> Client -> User)*
 
 ## ❓ Troubleshooting
 
-*   **Local:** Check terminal output for errors. Ensure API keys and Function URLs in `.env` are correct. Consult the [Local Setup Guide](./docs/local_setup.md).
-*   **Cloud Run:** Check Cloud Build and Cloud Run logs. Verify Service Account permissions and Secret Manager setup. Consult the [Cloud Deployment Guide](./docs/cloud_deployment.md).
-*   See component READMEs (`client/`, `server/`, `cloud-functions/`) for more specific tips.
+*   Check terminal output for errors. Ensure `GOOGLE_API_KEY` in `.env` is correct.
+*   Consult the [Local Setup Guide](./docs/local_setup.md) for detailed setup instructions.
 
 ## 📜 License
 

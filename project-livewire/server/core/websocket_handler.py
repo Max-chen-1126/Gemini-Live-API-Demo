@@ -25,8 +25,6 @@ from typing import Any, Optional
 
 from core.gemini_client import create_gemini_session
 from core.session import SessionState, create_session, remove_session
-from core.tool_handler import execute_tool
-from google.genai import types
 
 logger = logging.getLogger(__name__)
 
@@ -43,14 +41,6 @@ async def cleanup_session(session: Optional[SessionState], session_id: str) -> N
     """Clean up session resources."""
     try:
         if session:
-            # Cancel any running tasks
-            if session.current_tool_execution:
-                session.current_tool_execution.cancel()
-                try:
-                    await session.current_tool_execution
-                except asyncio.CancelledError:
-                    pass
-
             # Close Gemini session
             if session.genai_session:
                 try:
@@ -192,13 +182,6 @@ async def handle_client_messages(websocket: Any, session: SessionState) -> None:
 
 async def handle_gemini_responses(websocket: Any, session: SessionState) -> None:
     """Handle responses from Gemini."""
-    tool_queue = asyncio.Queue()  # Queue for tool responses
-
-    # Start a background task to process tool calls
-    tool_processor = asyncio.create_task(
-        process_tool_queue(tool_queue, websocket, session)
-    )
-
     try:
         while True:
             async for response in session.genai_session.receive():
@@ -216,11 +199,6 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
                         )
                     logger.debug(f"Received response from Gemini: {debug_response}")
 
-                    # If there's a tool call, add it to the queue and continue
-                    if response.tool_call:
-                        await tool_queue.put(response.tool_call)
-                        continue  # Continue processing other responses while tool executes
-
                     # Process server content (including audio) immediately
                     await process_server_content(
                         websocket, session, response.server_content
@@ -229,75 +207,10 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
                 except Exception as e:
                     logger.error(f"Error handling Gemini response: {e}")
                     logger.error(f"Full traceback:\n{traceback.format_exc()}")
-    finally:
-        # Cancel and clean up tool processor
-        if tool_processor and not tool_processor.done():
-            tool_processor.cancel()
-            try:
-                await tool_processor
-            except asyncio.CancelledError:
-                pass
+    except Exception as e:
+        logger.error(f"Error in handle_gemini_responses: {e}")
+        raise
 
-        # Clear any remaining items in the queue
-        while not tool_queue.empty():
-            try:
-                tool_queue.get_nowait()
-                tool_queue.task_done()
-            except asyncio.QueueEmpty:
-                break
-
-
-async def process_tool_queue(
-    queue: asyncio.Queue, websocket: Any, session: SessionState
-):
-    """Process tool calls from the queue."""
-    while True:
-        tool_call = await queue.get()
-        try:
-            function_responses = []
-            for function_call in tool_call.function_calls:
-                # Store the tool execution in session state
-                session.current_tool_execution = asyncio.current_task()
-
-                # Send function call to client (for UI feedback)
-                await websocket.send(
-                    json.dumps(
-                        {
-                            "type": "function_call",
-                            "data": {
-                                "name": function_call.name,
-                                "args": function_call.args,
-                            },
-                        }
-                    )
-                )
-
-                tool_result = await execute_tool(function_call.name, function_call.args)
-
-                # Send function response to client
-                await websocket.send(
-                    json.dumps({"type": "function_response", "data": tool_result})
-                )
-
-                function_responses.append(
-                    types.FunctionResponse(
-                        name=function_call.name,
-                        id=function_call.id,
-                        response=tool_result,
-                    )
-                )
-
-                session.current_tool_execution = None
-
-            if function_responses:
-                tool_response = types.LiveClientToolResponse(
-                    function_responses=function_responses
-                )
-                await session.genai_session.send(input=tool_response)
-        except Exception as e:
-            logger.error(f"Error processing tool call: {e}")
-        finally:
-            queue.task_done()
 
 
 async def process_server_content(
