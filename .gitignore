@@ -208,6 +208,7 @@ __marimo__/
 
 # audio
 audio/
+*/*.pcm
 
 # Claude.md
 CLAUDE.md

@@ -1,5 +1,13 @@
+from google import genai
+
+
 def main():
-    print("Hello from gemini-live-api-demo!")
+    client = genai.Client(
+        vertexai=True, project="tw-maxchens-sandbox", location="us-central1"
+    )
+    for model in client.models.list(config={"query_base": True}):
+        if "gemini" in model.name:
+            print(model)
 
 
 if __name__ == "__main__":
