@@ -5,8 +5,8 @@ import websockets
 from websockets.legacy.protocol import WebSocketCommonProtocol
 from websockets.legacy.server import WebSocketServerProtocol
 
-HOST = "us-central1-aiplatform.googleapis.com"
-SERVICE_URL = f"wss://{HOST}/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent"
+HOST = "generativelanguage.googleapis.com"
+SERVICE_URL = f"wss://{HOST}/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent"
 
 DEBUG = False
 
@@ -34,7 +34,7 @@ async def proxy_task(
 
 
 async def create_proxy(
-    client_websocket: WebSocketCommonProtocol, bearer_token: str
+    client_websocket: WebSocketCommonProtocol, api_key: str
 ) -> None:
     """
     Establishes a WebSocket connection to the server and creates two tasks for
@@ -42,17 +42,13 @@ async def create_proxy(
 
     Args:
         client_websocket: The WebSocket connection of the client.
-        bearer_token: The bearer token for authentication with the server.
+        api_key: The API key for authentication with the Google AI Studio server.
     """
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {bearer_token}",
-    }
+    # Google AI Studio requires API key as query parameter
+    service_url_with_key = f"{SERVICE_URL}?key={api_key}"
 
-    async with websockets.connect(
-        SERVICE_URL, additional_headers=headers
-    ) as server_websocket:
+    async with websockets.connect(service_url_with_key) as server_websocket:
         client_to_server_task = asyncio.create_task(
             proxy_task(client_websocket, server_websocket)
         )
@@ -64,7 +60,7 @@ async def create_proxy(
 
 async def handle_client(client_websocket: WebSocketServerProtocol) -> None:
     """
-    Handles a new client connection, expecting the first message to contain a bearer token.
+    Handles a new client connection, expecting the first message to contain an API key.
     Establishes a proxy connection to the server upon successful authentication.
 
     Args:
@@ -75,14 +71,14 @@ async def handle_client(client_websocket: WebSocketServerProtocol) -> None:
     auth_message = await asyncio.wait_for(client_websocket.recv(), timeout=5.0)
     auth_data = json.loads(auth_message)
 
-    if "bearer_token" in auth_data:
-        bearer_token = auth_data["bearer_token"]
+    if "api_key" in auth_data:
+        api_key = auth_data["api_key"]
     else:
-        print("Error: Bearer token not found in the first message.")
-        await client_websocket.close(code=1008, reason="Bearer token missing")
+        print("Error: API key not found in the first message.")
+        await client_websocket.close(code=1008, reason="API key missing")
         return
 
-    await create_proxy(client_websocket, bearer_token)
+    await create_proxy(client_websocket, api_key)
 
 
 async def main() -> None:

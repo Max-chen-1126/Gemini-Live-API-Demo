@@ -19,19 +19,14 @@ class GeminiLiveResponseMessage {
 }
 
 class GeminiLiveAPI {
-    constructor(proxyUrl, projectId, model, apiHost) {
+    constructor(proxyUrl, model) {
         this.proxyUrl = proxyUrl;
-
-        this.projectId = projectId;
         this.model = model;
-        this.modelUri = `projects/${this.projectId}/locations/us-central1/publishers/google/models/${this.model}`;
+        this.modelUri = `models/${this.model}`;
 
         this.responseModalities = ["AUDIO"];
         this.systemInstructions = "";
-        this.languageCode = "en-US";
-
-        this.apiHost = apiHost;
-        this.serviceUrl = `wss://${this.apiHost}/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent`;
+        this.languageCode = "cmn-CN";
 
         this.onReceiveResponse = (message) => {
             console.log("Default message received callback", message);
@@ -45,24 +40,19 @@ class GeminiLiveAPI {
             alert(message);
         };
 
-        this.accessToken = "";
+        this.apiKey = "";
         this.websocket = null;
 
         console.log("Created Gemini Live API object: ", this);
     }
 
-    setProjectId(projectId) {
-        this.projectId = projectId;
-        this.modelUri = `projects/${this.projectId}/locations/us-central1/publishers/google/models/${this.model}`;
+    setApiKey(newApiKey) {
+        console.log("setting API key: ", newApiKey);
+        this.apiKey = newApiKey;
     }
 
-    setAccessToken(newAccessToken) {
-        console.log("setting access token: ", newAccessToken);
-        this.accessToken = newAccessToken;
-    }
-
-    connect(accessToken) {
-        this.setAccessToken(accessToken);
+    connect(apiKey) {
+        this.setApiKey(apiKey);
         this.setupWebSocketToService();
     }
 
@@ -107,12 +97,14 @@ class GeminiLiveAPI {
     }
 
     sendInitialSetupMessages() {
+        // Send API key to the proxy server
         const serviceSetupMessage = {
-            bearer_token: this.accessToken,
-            service_url: this.serviceUrl,
+            api_key: this.apiKey,
         };
         this.sendMessage(serviceSetupMessage);
 
+        // Setup session configuration for Google AI Studio
+        // NOTE: Google APIs use snake_case for JSON keys.
         const generationConfig = {
             response_modalities: this.responseModalities,
         };
@@ -120,16 +112,36 @@ class GeminiLiveAPI {
         if (this.languageCode) {
             generationConfig.speech_config = {
                 language_code: this.languageCode,
+                voice_config: {
+                    prebuilt_voice_config: {
+                        voice_name: "Charon"
+                    }
+                }
             };
         }
+
+        // Explicitly configure VAD and barge-in (interrupt) behavior.
+        // NOTE: These are the default settings, but it's good practice to be explicit.
+        const realtimeInputConfig = {
+            // Use the server's automatic voice activity detection with high sensitivity.
+            automatic_activity_detection: {
+                // How likely speech is to be detected.
+                start_of_speech_sensitivity: "START_SENSITIVITY_HIGH",
+                // Required duration of speech before committing. Lower is more sensitive.
+                prefix_padding_ms: 100,
+                // How likely speech is to be ended.
+                end_of_speech_sensitivity: "END_SENSITIVITY_HIGH",
+            },
+            // Interrupt the model's response when the user starts speaking.
+            activity_handling: "START_OF_ACTIVITY_INTERRUPTS",
+        };
 
         const sessionSetupMessage = {
             setup: {
                 model: this.modelUri,
                 generation_config: generationConfig,
-                system_instruction: {
-                    parts: [{ text: this.systemInstructions }],
-                },
+                system_instruction: { parts: [{ text: this.systemInstructions }] },
+                realtime_input_config: realtimeInputConfig,
             },
         };
         this.sendMessage(sessionSetupMessage);
@@ -151,16 +163,21 @@ class GeminiLiveAPI {
     }
 
     sendRealtimeInputMessage(data, mime_type) {
+        // NOTE: `media_chunks` is deprecated. Use `audio` or `video` fields instead.
         const message = {
-            realtime_input: {
-                media_chunks: [
-                    {
-                        mime_type: mime_type,
-                        data: data,
-                    },
-                ],
-            },
+            realtime_input: {},
         };
+
+        const blob = {
+            mime_type: mime_type,
+            data: data,
+        };
+
+        if (mime_type.startsWith("audio/")) {
+            message.realtime_input.audio = blob;
+        } else if (mime_type.startsWith("image/")) {
+            message.realtime_input.video = blob;
+        }
         this.sendMessage(message);
     }
 

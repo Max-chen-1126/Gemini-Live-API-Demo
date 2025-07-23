@@ -6,17 +6,13 @@ window.addEventListener("load", (event) => {
 });
 
 const PROXY_URL = "ws://localhost:8080";
-const PROJECT_ID = "tw-maxchens-sandbox";
-const MODEL = "gemini-2.0-flash-live-preview-04-09";
-const API_HOST = "us-central1-aiplatform.googleapis.com";
+const MODEL = "gemini-live-2.5-flash-preview";
 
-const accessTokenInput = document.getElementById("token");
-const projectInput = document.getElementById("project");
+const apiKeyInput = document.getElementById("apiKey");
 const systemInstructionsInput = document.getElementById("systemInstructions");
 const languageCodeInput = document.getElementById("languageCode");
 
-CookieJar.init("token");
-CookieJar.init("project");
+CookieJar.init("apiKey");
 CookieJar.init("systemInstructions");
 CookieJar.init("languageCode");
 
@@ -33,7 +29,7 @@ const screenBtn = document.getElementById("screenBtn");
 const cameraSelect = document.getElementById("cameraSource");
 const micSelect = document.getElementById("audioSource");
 
-const geminiLiveApi = new GeminiLiveAPI(PROXY_URL, PROJECT_ID, MODEL, API_HOST);
+const geminiLiveApi = new GeminiLiveAPI(PROXY_URL, MODEL);
 
 geminiLiveApi.onErrorMessage = (message) => {
     showDialogWithMessage(message);
@@ -72,8 +68,7 @@ function connectBtnClick() {
         startAudioInput();
     };
 
-    geminiLiveApi.setProjectId(projectInput.value);
-    geminiLiveApi.connect(accessTokenInput.value);
+    geminiLiveApi.connect(apiKeyInput.value);
 }
 
 const liveAudioOutputManager = new LiveAudioOutputManager();
