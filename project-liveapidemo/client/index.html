@@ -13,449 +13,568 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
- 
+
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live API Demo</title>
-  <link rel="stylesheet" href="styles/style.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
-</head>
-<body>
-  <div class="container">
-    <h1>Live API Demo</h1>
-    <p>使用方式 : 可以通過打字或對著麥克風說話，並可選擇分享網路攝影機或螢幕。</p>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live API Demo</title>
+    <link rel="stylesheet" href="styles/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
 
-  <div class="input-container">
-    <button id="micButton" disabled class="action-button">
-      <span class="material-symbols-outlined">mic</span>
-    </button>
-    <button id="webcamButton" class="action-button">
-      <span class="material-symbols-outlined">videocam</span>
-    </button>
-    <button id="screenButton" class="action-button">
-      <span class="material-symbols-outlined">present_to_all</span>
-    </button>
-    <div class="text-input-container">
-      <input type="text" id="textInput" placeholder="Type your message..." class="text-input">
-      <button id="sendButton" class="action-button">
-        <span class="material-symbols-outlined">send</span>
-      </button>
-      <button id="interruptButton" class="action-button" style="display: none;">
-        <span class="material-symbols-outlined">cancel</span>
-      </button>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Live API Demo</h1>
+      <p>
+        使用方式 : 可以通過打字或對著麥克風說話，並可選擇分享網路攝影機或螢幕。
+      </p>
     </div>
-  </div>
 
-  <div class="video-container">
-    <video id="videoPreview" autoplay playsinline class="hidden"></video>
-  </div>
+    <div class="input-container">
+      <button id="micButton" disabled class="action-button">
+        <span class="material-symbols-outlined">mic</span>
+      </button>
+      <button id="webcamButton" class="action-button">
+        <span class="material-symbols-outlined">videocam</span>
+      </button>
+      <button id="screenButton" class="action-button">
+        <span class="material-symbols-outlined">present_to_all</span>
+      </button>
+      <div class="text-input-container">
+        <input
+          type="text"
+          id="textInput"
+          placeholder="Type your message..."
+          class="text-input"
+        />
+        <button id="sendButton" class="action-button">
+          <span class="material-symbols-outlined">send</span>
+        </button>
+        <button
+          id="interruptButton"
+          class="action-button"
+          style="display: none"
+        >
+          <span class="material-symbols-outlined">cancel</span>
+        </button>
+      </div>
+    </div>
 
-  <div id="output"></div>
+    <div class="video-container">
+      <video id="videoPreview" autoplay playsinline class="hidden"></video>
+    </div>
 
-  <!-- Load EventEmitter3 first -->
-  <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
+    <div id="output"></div>
 
-  <script type="module">
-    import { AudioRecorder } from './src/audio/audio-recorder.js';
-    import { AudioStreamer } from './src/audio/audio-streamer.js';
-    import { MediaHandler } from './src/media/media-handler.js';
-    import { GeminiAPI } from './src/api/gemini-api.js';
-    import { base64ToArrayBuffer } from './src/utils/utils.js';
+    <!-- Load EventEmitter3 first -->
+    <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
 
-    // Initialize components
-    const output = document.getElementById('output');
-    const audioRecorder = new AudioRecorder();
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
-    const audioStreamer = new AudioStreamer(audioContext);
-    const mediaHandler = new MediaHandler();
-    const wsEndpoint = 'ws://localhost:8081';
-    const api = new GeminiAPI(wsEndpoint);
+    <script type="module">
+      import { AudioRecorder } from "./src/audio/audio-recorder.js";
+      import { AudioStreamer } from "./src/audio/audio-streamer.js";
+      import { MediaHandler } from "./src/media/media-handler.js";
+      import { GeminiAPI } from "./src/api/gemini-api.js";
+      import { base64ToArrayBuffer } from "./src/utils/utils.js";
 
-    let isRecording = false;
-    let hasShownSpeakingMessage = false;
-    let currentTurn = 0;
-    let lastAudioTurn = -1;
-    
-    // Transcription management
-    let inputTranscriptionBuffer = '';
-    let outputTranscriptionBuffer = '';
-    let currentInputTranscriptionId = null;
-    let currentOutputTranscriptionId = null;
+      // Initialize components
+      const output = document.getElementById("output");
+      const audioRecorder = new AudioRecorder();
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)({ sampleRate: 24000 });
+      const audioStreamer = new AudioStreamer(audioContext);
+      const mediaHandler = new MediaHandler();
+      const wsEndpoint = "ws://localhost:8081";
+      const api = new GeminiAPI(wsEndpoint);
 
-    // Initialize media handler
-    mediaHandler.initialize(document.getElementById('videoPreview'));
+      let isRecording = false;
+      let hasShownSpeakingMessage = false;
+      let currentTurn = 0;
+      let lastAudioTurn = -1;
 
-    // Set up API handlers
-    api.onReady = () => {
-      document.getElementById('micButton').disabled = false;
-    };
+      // Transcription management
+      let inputTranscriptionBuffer = "";
+      let outputTranscriptionBuffer = "";
+      let currentInputTranscriptionId = null;
+      let currentOutputTranscriptionId = null;
 
-    api.onAudioData = async (audioData) => {
-      try {
-        if (!api.isSpeaking || lastAudioTurn !== currentTurn) {
-          logMessage('Gemini: Speaking...');
-          api.isSpeaking = true;
-          lastAudioTurn = currentTurn;
-          document.getElementById('interruptButton').style.display = 'inline-block';
-        }
-        const arrayBuffer = base64ToArrayBuffer(audioData);
-        audioStreamer.addPCM16(new Uint8Array(arrayBuffer));
-        audioStreamer.resume();
-      } catch (error) {
-        console.error('Error playing audio:', error);
-      }
-    };
+      // Initialize media handler
+      mediaHandler.initialize(document.getElementById("videoPreview"));
 
-    api.onTextContent = (text) => {
-      if (text.trim()) {
-        logMessage('Gemini: ' + text);
-      }
-    };
+      // Set up API handlers
+      api.onReady = () => {
+        document.getElementById("micButton").disabled = false;
+      };
 
-    api.onTurnComplete = () => {
-      logMessage('Gemini: Finished speaking');
-      api.isSpeaking = false;  // Reset speaking state
-      audioStreamer.complete();
-      document.getElementById('interruptButton').style.display = 'none';
-      
-      // Finalize any remaining transcriptions
-      if (currentOutputTranscriptionId && outputTranscriptionBuffer) {
-        console.log('Finalizing output transcription on turn complete:', outputTranscriptionBuffer);
-        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', false, 'output');
-        outputTranscriptionBuffer = '';
-      }
-      
-      if (currentInputTranscriptionId && inputTranscriptionBuffer) {
-        console.log('Finalizing input transcription on turn complete:', inputTranscriptionBuffer);
-        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', false, 'input');
-        inputTranscriptionBuffer = '';
-      }
-    };
-
-    // Add interruption handler
-    api.onInterrupted = (data) => {
-      logMessage('Gemini: Response interrupted');
-      api.isSpeaking = false;
-      audioStreamer.stop();  // Stop current playback and clear queue
-      document.getElementById('interruptButton').style.display = 'none';
-      
-      // Show visual feedback for interruption
-      const messageElement = document.createElement('p');
-      messageElement.className = 'interrupted-message';
-      messageElement.textContent = 'Response interrupted by user input';
-      output.appendChild(messageElement);
-      output.scrollTop = output.scrollHeight;
-    };
-
-    // Add function call and response handlers
-    api.onFunctionCall = (data) => {
-      logMessage('Function: ' + data.name);
-      logMessage('Parameters: ' + JSON.stringify(data.args, null, 2));
-    };
-
-    api.onFunctionResponse = (data) => {
-      logMessage('API Response: ' + JSON.stringify(data, null, 2));
-    };
-
-    api.onInputTranscription = (data) => {
-      console.log('Input transcription callback called with data:', data);
-      // Handle null is_final as interim (not final)
-      const isInterim = data.is_final === null || data.is_final === false;
-      
-      if (isInterim) {
-        // Accumulate transcription text
-        inputTranscriptionBuffer += data.text;
-        console.log('Accumulated input transcription:', inputTranscriptionBuffer);
-        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', true, 'input');
-      } else {
-        // Final transcription
-        inputTranscriptionBuffer += data.text;
-        console.log('Final input transcription:', inputTranscriptionBuffer);
-        logAccumulatedTranscription(`You: ${inputTranscriptionBuffer}`, 'user-message', false, 'input');
-        inputTranscriptionBuffer = ''; // Reset buffer
-      }
-    };
-
-    api.onOutputTranscription = (data) => {
-      console.log('Output transcription callback called with data:', data);
-      // Handle null is_final as interim (not final)
-      const isInterim = data.is_final === null || data.is_final === false;
-      
-      if (isInterim) {
-        // Accumulate transcription text
-        outputTranscriptionBuffer += data.text;
-        console.log('Accumulated output transcription:', outputTranscriptionBuffer);
-        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', true, 'output');
-      } else {
-        // Final transcription
-        outputTranscriptionBuffer += data.text;
-        console.log('Final output transcription:', outputTranscriptionBuffer);
-        logAccumulatedTranscription(`Gemini: ${outputTranscriptionBuffer}`, 'gemini-message', false, 'output');
-        outputTranscriptionBuffer = ''; // Reset buffer
-      }
-    };
-
-    // UI Event Handlers
-    async function startRecording() {
-      try {
-        // If model is speaking, treat this as an interruption
-        if (api.isSpeaking) {
-          audioStreamer.stop();
-          api.isSpeaking = false;
-        }
-
-        // Reset input transcription buffer for new recording
-        inputTranscriptionBuffer = '';
-        currentInputTranscriptionId = null;
-
-        await audioContext.resume();
-        await audioRecorder.start();
-        hasShownSpeakingMessage = false;
-        currentTurn++;
-        
-        audioRecorder.on('data', (base64Data) => {
-          if (!hasShownSpeakingMessage) {
-            logMessage('You: Speaking...');
-            hasShownSpeakingMessage = true;
+      api.onAudioData = async (audioData) => {
+        try {
+          if (!api.isSpeaking || lastAudioTurn !== currentTurn) {
+            logMessage("Gemini: Speaking...");
+            api.isSpeaking = true;
+            lastAudioTurn = currentTurn;
+            document.getElementById("interruptButton").style.display =
+              "inline-block";
           }
-          api.sendAudioChunk(base64Data);
+          const arrayBuffer = base64ToArrayBuffer(audioData);
+          audioStreamer.addPCM16(new Uint8Array(arrayBuffer));
+          audioStreamer.resume();
+        } catch (error) {
+          console.error("Error playing audio:", error);
+        }
+      };
+
+      api.onTextContent = (text) => {
+        if (text.trim()) {
+          logMessage("Gemini: " + text);
+        }
+      };
+
+      api.onTurnComplete = () => {
+        logMessage("Gemini: Finished speaking");
+        api.isSpeaking = false; // Reset speaking state
+        audioStreamer.complete();
+        document.getElementById("interruptButton").style.display = "none";
+
+        // Finalize any remaining transcriptions
+        if (currentOutputTranscriptionId && outputTranscriptionBuffer) {
+          console.log(
+            "Finalizing output transcription on turn complete:",
+            outputTranscriptionBuffer
+          );
+          logAccumulatedTranscription(
+            `Gemini: ${outputTranscriptionBuffer}`,
+            "gemini-message",
+            false,
+            "output"
+          );
+          outputTranscriptionBuffer = "";
+        }
+
+        if (currentInputTranscriptionId && inputTranscriptionBuffer) {
+          console.log(
+            "Finalizing input transcription on turn complete:",
+            inputTranscriptionBuffer
+          );
+          logAccumulatedTranscription(
+            `You: ${inputTranscriptionBuffer}`,
+            "user-message",
+            false,
+            "input"
+          );
+          inputTranscriptionBuffer = "";
+        }
+      };
+
+      // Add interruption handler
+      api.onInterrupted = (data) => {
+        logMessage("Gemini: Response interrupted");
+        api.isSpeaking = false;
+        audioStreamer.stop(); // Stop current playback and clear queue
+        document.getElementById("interruptButton").style.display = "none";
+
+        // Show visual feedback for interruption
+        const messageElement = document.createElement("p");
+        messageElement.className = "interrupted-message";
+        messageElement.textContent = "Response interrupted by user input";
+        output.appendChild(messageElement);
+        output.scrollTop = output.scrollHeight;
+      };
+
+      // Add function call and response handlers
+      api.onFunctionCall = (data) => {
+        logMessage("Function: " + data.name);
+        logMessage("Parameters: " + JSON.stringify(data.args, null, 2));
+      };
+
+      api.onFunctionResponse = (data) => {
+        logMessage("API Response: " + JSON.stringify(data, null, 2));
+      };
+
+      // Add tool use and result handlers
+      api.onToolUse = (data) => {
+        logMessage(
+          `🔍 正在執行 ${
+            data.tool === "google_search" ? "Google 搜尋" : data.tool
+          }...`
+        );
+        logMessage(`執行代碼: ${data.code}`);
+      };
+
+      api.onToolResult = (data) => {
+        logMessage(
+          `✅ ${data.tool === "google_search" ? "Google 搜尋" : data.tool}完成`
+        );
+      };
+
+      api.onInputTranscription = (data) => {
+        console.log("Input transcription callback called with data:", data);
+        // Handle null is_final as interim (not final)
+        const isInterim = data.is_final === null || data.is_final === false;
+
+        if (isInterim) {
+          // Accumulate transcription text
+          inputTranscriptionBuffer += data.text;
+          console.log(
+            "Accumulated input transcription:",
+            inputTranscriptionBuffer
+          );
+          logAccumulatedTranscription(
+            `You: ${inputTranscriptionBuffer}`,
+            "user-message",
+            true,
+            "input"
+          );
+        } else {
+          // Final transcription
+          inputTranscriptionBuffer += data.text;
+          console.log("Final input transcription:", inputTranscriptionBuffer);
+          logAccumulatedTranscription(
+            `You: ${inputTranscriptionBuffer}`,
+            "user-message",
+            false,
+            "input"
+          );
+          inputTranscriptionBuffer = ""; // Reset buffer
+        }
+      };
+
+      api.onOutputTranscription = (data) => {
+        console.log("Output transcription callback called with data:", data);
+        // Handle null is_final as interim (not final)
+        const isInterim = data.is_final === null || data.is_final === false;
+
+        if (isInterim) {
+          // Accumulate transcription text
+          outputTranscriptionBuffer += data.text;
+          console.log(
+            "Accumulated output transcription:",
+            outputTranscriptionBuffer
+          );
+          logAccumulatedTranscription(
+            `Gemini: ${outputTranscriptionBuffer}`,
+            "gemini-message",
+            true,
+            "output"
+          );
+        } else {
+          // Final transcription
+          outputTranscriptionBuffer += data.text;
+          console.log("Final output transcription:", outputTranscriptionBuffer);
+          logAccumulatedTranscription(
+            `Gemini: ${outputTranscriptionBuffer}`,
+            "gemini-message",
+            false,
+            "output"
+          );
+          outputTranscriptionBuffer = ""; // Reset buffer
+        }
+      };
+
+      // UI Event Handlers
+      async function startRecording() {
+        try {
+          // If model is speaking, treat this as an interruption
+          if (api.isSpeaking) {
+            audioStreamer.stop();
+            api.isSpeaking = false;
+          }
+
+          // Reset input transcription buffer for new recording
+          inputTranscriptionBuffer = "";
+          currentInputTranscriptionId = null;
+
+          await audioContext.resume();
+          await audioRecorder.start();
+          hasShownSpeakingMessage = false;
+          currentTurn++;
+
+          audioRecorder.on("data", (base64Data) => {
+            if (!hasShownSpeakingMessage) {
+              logMessage("You: Speaking...");
+              hasShownSpeakingMessage = true;
+            }
+            api.sendAudioChunk(base64Data);
+          });
+
+          isRecording = true;
+          document.getElementById("micButton").innerHTML =
+            '<span class="material-symbols-outlined">stop</span>';
+        } catch (error) {
+          console.error("Error starting recording:", error);
+          logMessage("Error: " + error.message);
+        }
+      }
+
+      function stopRecording() {
+        audioRecorder.stop();
+        isRecording = false;
+        hasShownSpeakingMessage = false;
+        document.getElementById("micButton").innerHTML =
+          '<span class="material-symbols-outlined">mic</span>';
+        logMessage("You: Recording stopped.");
+
+        // Stop video streams
+        mediaHandler.stopAll();
+        document.getElementById("webcamButton").innerHTML =
+          '<span class="material-symbols-outlined">videocam</span>';
+        document.getElementById("screenButton").innerHTML =
+          '<span class="material-symbols-outlined">present_to_all</span>';
+
+        api.sendEndMessage();
+        api.isSpeaking = false;
+      }
+
+      function logMessage(message) {
+        const messageElement = document.createElement("p");
+
+        // Add specific styling based on message content
+        if (message.startsWith("Function:")) {
+          messageElement.className = "function-name";
+        } else if (message.startsWith("Parameters:")) {
+          messageElement.className = "function-params";
+        } else if (message.startsWith("API Response:")) {
+          messageElement.className = "api-response";
+        } else if (
+          message.startsWith("🔍 正在執行") ||
+          message.startsWith("執行代碼:")
+        ) {
+          messageElement.className = "tool-execution";
+        } else if (
+          message.startsWith("✅") &&
+          (message.includes("完成") || message.includes("搜尋結果:"))
+        ) {
+          messageElement.className = "tool-result";
+        } else if (message.startsWith("Gemini:")) {
+          messageElement.className = "gemini-message";
+        } else if (message.startsWith("You:")) {
+          messageElement.className = "user-message";
+        }
+
+        messageElement.textContent = message;
+        output.appendChild(messageElement);
+        output.scrollTop = output.scrollHeight;
+      }
+
+      function logAccumulatedTranscription(
+        message,
+        className,
+        isInterim,
+        transcriptionType
+      ) {
+        console.log("logAccumulatedTranscription called with:", {
+          message,
+          className,
+          isInterim,
+          transcriptionType,
         });
 
-        isRecording = true;
-        document.getElementById('micButton').innerHTML = 
-          '<span class="material-symbols-outlined">stop</span>';
-      } catch (error) {
-        console.error('Error starting recording:', error);
-        logMessage('Error: ' + error.message);
-      }
-    }
+        const container = document.getElementById("output");
+        const transcriptionId =
+          transcriptionType === "input"
+            ? currentInputTranscriptionId
+            : currentOutputTranscriptionId;
 
-    function stopRecording() {
-      audioRecorder.stop();
-      isRecording = false;
-      hasShownSpeakingMessage = false;
-      document.getElementById('micButton').innerHTML = 
-        '<span class="material-symbols-outlined">mic</span>';
-      logMessage('You: Recording stopped.');
-      
-      // Stop video streams
-      mediaHandler.stopAll();
-      document.getElementById('webcamButton').innerHTML = 
-        '<span class="material-symbols-outlined">videocam</span>';
-      document.getElementById('screenButton').innerHTML = 
-        '<span class="material-symbols-outlined">present_to_all</span>';
-      
-      api.sendEndMessage();
-      api.isSpeaking = false;
-    }
+        // Find existing transcription element by ID
+        let messageElement = transcriptionId
+          ? document.getElementById(transcriptionId)
+          : null;
 
-    function logMessage(message) {
-      const messageElement = document.createElement('p');
-      
-      // Add specific styling based on message content
-      if (message.startsWith('Function:')) {
-        messageElement.className = 'function-name';
-      } else if (message.startsWith('Parameters:')) {
-        messageElement.className = 'function-params';
-      } else if (message.startsWith('API Response:')) {
-        messageElement.className = 'api-response';
-      } else if (message.startsWith('Gemini:')) {
-        messageElement.className = 'gemini-message';
-      } else if (message.startsWith('You:')) {
-        messageElement.className = 'user-message';
-      }
-      
-      messageElement.textContent = message;
-      output.appendChild(messageElement);
-      output.scrollTop = output.scrollHeight;
-    }
+        if (isInterim) {
+          console.log("Processing interim transcription");
+          if (!messageElement) {
+            console.log("Creating new interim transcription element");
+            messageElement = document.createElement("p");
+            messageElement.className = className + " interim";
 
-    function logAccumulatedTranscription(message, className, isInterim, transcriptionType) {
-      console.log('logAccumulatedTranscription called with:', {message, className, isInterim, transcriptionType});
-      
-      const container = document.getElementById('output');
-      const transcriptionId = transcriptionType === 'input' ? currentInputTranscriptionId : currentOutputTranscriptionId;
-      
-      // Find existing transcription element by ID
-      let messageElement = transcriptionId ? document.getElementById(transcriptionId) : null;
-      
-      if (isInterim) {
-        console.log('Processing interim transcription');
-        if (!messageElement) {
-            console.log('Creating new interim transcription element');
-            messageElement = document.createElement('p');
-            messageElement.className = className + ' interim';
-            
             // Generate unique ID for this transcription sequence
-            const newId = `transcription-${transcriptionType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            const newId = `transcription-${transcriptionType}-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`;
             messageElement.id = newId;
-            
+
             // Store the ID for future updates
-            if (transcriptionType === 'input') {
+            if (transcriptionType === "input") {
               currentInputTranscriptionId = newId;
             } else {
               currentOutputTranscriptionId = newId;
             }
-            
+
             container.appendChild(messageElement);
+          } else {
+            console.log("Updating existing interim transcription element");
+          }
+          messageElement.textContent = message;
+          console.log("Set interim transcription text to:", message);
         } else {
-            console.log('Updating existing interim transcription element');
-        }
-        messageElement.textContent = message;
-        console.log('Set interim transcription text to:', message);
-      } else {
-        console.log('Processing final transcription');
-        if (messageElement) {
-            console.log('Finalizing existing transcription element');
+          console.log("Processing final transcription");
+          if (messageElement) {
+            console.log("Finalizing existing transcription element");
             messageElement.textContent = message;
-            messageElement.classList.remove('interim');
-            messageElement.classList.add('final');
-        } else {
-            console.log('Creating new final transcription element');
-            const finalElement = document.createElement('p');
-            finalElement.className = className + ' final';
+            messageElement.classList.remove("interim");
+            messageElement.classList.add("final");
+          } else {
+            console.log("Creating new final transcription element");
+            const finalElement = document.createElement("p");
+            finalElement.className = className + " final";
             finalElement.textContent = message;
             container.appendChild(finalElement);
+          }
+
+          // Reset the transcription ID
+          if (transcriptionType === "input") {
+            currentInputTranscriptionId = null;
+          } else {
+            currentOutputTranscriptionId = null;
+          }
         }
-        
-        // Reset the transcription ID
-        if (transcriptionType === 'input') {
-          currentInputTranscriptionId = null;
-        } else {
-          currentOutputTranscriptionId = null;
-        }
+
+        container.scrollTop = container.scrollHeight;
+        console.log("Accumulated transcription element processed successfully");
       }
-      
-      container.scrollTop = container.scrollHeight;
-      console.log('Accumulated transcription element processed successfully');
-    }
 
-    // Keep the old function for backward compatibility
-    function logTranscription(message, className, isInterim) {
-      console.log('logTranscription called with:', {message, className, isInterim});
-      
-      const container = document.getElementById('output');
-      const interimSelector = `.interim.${className}`;
-      let messageElement = isInterim ? container.querySelector(interimSelector) : null;
-      
-      console.log('Container:', container, 'InterimSelector:', interimSelector, 'Existing element:', messageElement);
+      // Keep the old function for backward compatibility
+      function logTranscription(message, className, isInterim) {
+        console.log("logTranscription called with:", {
+          message,
+          className,
+          isInterim,
+        });
 
-      if (isInterim) {
-        console.log('Processing interim transcription');
-        if (!messageElement) {
-            console.log('Creating new interim element');
-            messageElement = document.createElement('p');
-            messageElement.className = className + ' interim';
+        const container = document.getElementById("output");
+        const interimSelector = `.interim.${className}`;
+        let messageElement = isInterim
+          ? container.querySelector(interimSelector)
+          : null;
+
+        console.log(
+          "Container:",
+          container,
+          "InterimSelector:",
+          interimSelector,
+          "Existing element:",
+          messageElement
+        );
+
+        if (isInterim) {
+          console.log("Processing interim transcription");
+          if (!messageElement) {
+            console.log("Creating new interim element");
+            messageElement = document.createElement("p");
+            messageElement.className = className + " interim";
             container.appendChild(messageElement);
+          } else {
+            console.log("Using existing interim element");
+          }
+          messageElement.textContent = message;
+          console.log("Set interim element text to:", message);
         } else {
-            console.log('Using existing interim element');
-        }
-        messageElement.textContent = message;
-        console.log('Set interim element text to:', message);
-      } else {
-        console.log('Processing final transcription');
-        const interimElement = container.querySelector(interimSelector);
-        console.log('Found interim element for finalization:', interimElement);
-        if (interimElement) {
-            console.log('Updating existing interim element to final');
+          console.log("Processing final transcription");
+          const interimElement = container.querySelector(interimSelector);
+          console.log(
+            "Found interim element for finalization:",
+            interimElement
+          );
+          if (interimElement) {
+            console.log("Updating existing interim element to final");
             interimElement.textContent = message;
-            interimElement.classList.remove('interim');
-        } else {
-            console.log('Creating new final element');
+            interimElement.classList.remove("interim");
+          } else {
+            console.log("Creating new final element");
             // If a final result comes without an interim one, just log it.
-            const finalElement = document.createElement('p');
+            const finalElement = document.createElement("p");
             finalElement.className = className;
             finalElement.textContent = message;
             container.appendChild(finalElement);
+          }
         }
+        container.scrollTop = container.scrollHeight;
+        console.log("Transcription element added/updated successfully");
       }
-      container.scrollTop = container.scrollHeight;
-      console.log('Transcription element added/updated successfully');
-    }
 
-    // Add function to send text message
-    function sendTextMessage() {
-      const textInput = document.getElementById('textInput');
-      const text = textInput.value.trim();
-      if (!text) return;
+      // Add function to send text message
+      function sendTextMessage() {
+        const textInput = document.getElementById("textInput");
+        const text = textInput.value.trim();
+        if (!text) return;
 
-      // Clear input
-      textInput.value = '';
+        // Clear input
+        textInput.value = "";
 
-      // Reset output transcription buffer for new response
-      outputTranscriptionBuffer = '';
-      currentOutputTranscriptionId = null;
+        // Reset output transcription buffer for new response
+        outputTranscriptionBuffer = "";
+        currentOutputTranscriptionId = null;
 
-      // Log user message
-      logMessage('You: ' + text);
+        // Log user message
+        logMessage("You: " + text);
 
-      // Send text message
-      api.sendTextMessage(text);
-    }
-
-    // Set up button click handlers
-    document.getElementById('micButton').onclick = () => {
-      if (isRecording) {
-        stopRecording();
-      } else {
-        startRecording();
+        // Send text message
+        api.sendTextMessage(text);
       }
-    };
 
-    // Add send button handler
-    document.getElementById('sendButton').onclick = sendTextMessage;
-
-    // Add keypress handler for text input
-    document.getElementById('textInput').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        sendTextMessage();
-      }
-    });
-
-    document.getElementById('webcamButton').onclick = async () => {
-      if (mediaHandler.isWebcamActive) {
-        mediaHandler.stopAll();
-        document.getElementById('webcamButton').innerHTML = 
-          '<span class="material-symbols-outlined">videocam</span>';
-      } else {
-        const success = await mediaHandler.startWebcam();
-        if (success) {
-          document.getElementById('webcamButton').innerHTML = 
-            '<span class="material-symbols-outlined">videocam_off</span>';
-          mediaHandler.startFrameCapture((base64Image) => {
-            api.sendImage(base64Image);
-          });
+      // Set up button click handlers
+      document.getElementById("micButton").onclick = () => {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
         }
-      }
-    };
+      };
 
-    document.getElementById('screenButton').onclick = async () => {
-      if (mediaHandler.isScreenActive) {
-        mediaHandler.stopAll();
-        document.getElementById('screenButton').innerHTML = 
-          '<span class="material-symbols-outlined">present_to_all</span>';
-      } else {
-        const success = await mediaHandler.startScreenShare();
-        if (success) {
-          document.getElementById('screenButton').innerHTML = 
-            '<span class="material-symbols-outlined">cancel_presentation</span>';
-          mediaHandler.startFrameCapture((base64Image) => {
-            api.sendImage(base64Image);
-          });
+      // Add send button handler
+      document.getElementById("sendButton").onclick = sendTextMessage;
+
+      // Add keypress handler for text input
+      document
+        .getElementById("textInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            sendTextMessage();
+          }
+        });
+
+      document.getElementById("webcamButton").onclick = async () => {
+        if (mediaHandler.isWebcamActive) {
+          mediaHandler.stopAll();
+          document.getElementById("webcamButton").innerHTML =
+            '<span class="material-symbols-outlined">videocam</span>';
+        } else {
+          const success = await mediaHandler.startWebcam();
+          if (success) {
+            document.getElementById("webcamButton").innerHTML =
+              '<span class="material-symbols-outlined">videocam_off</span>';
+            mediaHandler.startFrameCapture((base64Image) => {
+              api.sendImage(base64Image);
+            });
+          }
         }
-      }
-    };
+      };
 
-    // Add CSS for interrupted message and transcription states
-    const style = document.createElement('style');
-    style.textContent = `
+      document.getElementById("screenButton").onclick = async () => {
+        if (mediaHandler.isScreenActive) {
+          mediaHandler.stopAll();
+          document.getElementById("screenButton").innerHTML =
+            '<span class="material-symbols-outlined">present_to_all</span>';
+        } else {
+          const success = await mediaHandler.startScreenShare();
+          if (success) {
+            document.getElementById("screenButton").innerHTML =
+              '<span class="material-symbols-outlined">cancel_presentation</span>';
+            mediaHandler.startFrameCapture((base64Image) => {
+              api.sendImage(base64Image);
+            });
+          }
+        }
+      };
+
+      // Add CSS for interrupted message and transcription states
+      const style = document.createElement("style");
+      style.textContent = `
       .interrupted-message {
         color: #ff6b6b;
         font-style: italic;
@@ -504,8 +623,29 @@
         0%, 50% { opacity: 1; }
         51%, 100% { opacity: 0; }
       }
+      
+      /* Tool execution styles */
+      .tool-execution {
+        color: #2196F3;
+        font-style: italic;
+        margin: 4px 0;
+        padding: 8px 12px;
+        border-left: 3px solid #2196F3;
+        background-color: rgba(33, 150, 243, 0.1);
+        border-radius: 4px;
+      }
+      
+      .tool-result {
+        color: #4CAF50;
+        margin: 4px 0;
+        padding: 8px 12px;
+        border-left: 3px solid #4CAF50;
+        background-color: rgba(76, 175, 80, 0.1);
+        border-radius: 4px;
+        font-weight: 500;
+      }
     `;
-    document.head.appendChild(style);
-  </script>
-</body>
+      document.head.appendChild(style);
+    </script>
+  </body>
 </html>

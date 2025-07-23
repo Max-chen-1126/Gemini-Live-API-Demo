@@ -378,6 +378,26 @@ video {
   color: rgb(158, 240, 158);
 }
 
+.tool-execution-display {
+  color: #2196F3;
+  font-style: italic;
+  background-color: rgba(33, 150, 243, 0.1);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid #2196F3;
+  margin: 4px 0;
+}
+
+.tool-result-display {
+  color: #4CAF50;
+  background-color: rgba(76, 175, 80, 0.1);
+  padding: 8px;
+  border-radius: 4px;
+  border-left: 3px solid #4CAF50;
+  margin: 4px 0;
+  font-weight: 500;
+}
+
 .interim {
   color: #aaa;
   font-style: italic;

@@ -280,6 +280,21 @@
       functionInfo.appendChild(responseElement);
     };
 
+    // Add tool use and result handlers
+    api.onToolUse = (data) => {
+      const functionInfo = document.getElementById('functionInfo');
+      const toolElement = document.createElement('pre');
+      toolElement.innerHTML = `<span class="tool-execution-display">🔍 正在執行 ${data.tool === 'google_search' ? 'Google 搜尋' : data.tool}...\n執行代碼: ${data.code}</span>`;
+      functionInfo.appendChild(toolElement);
+    };
+
+    api.onToolResult = (data) => {
+      const functionInfo = document.getElementById('functionInfo');
+      const resultElement = document.createElement('pre');
+      resultElement.innerHTML = `<span class="tool-result-display">✅ ${data.tool === 'google_search' ? 'Google 搜尋' : data.tool}完成</span>`;
+      functionInfo.appendChild(resultElement);
+    };
+
     // Button handlers
     document.getElementById('micButton').onclick = () => {
       isMuted = !isMuted;

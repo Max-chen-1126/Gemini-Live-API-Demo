@@ -285,6 +285,30 @@ async def process_server_content(
                 )
             elif part.text:
                 await websocket.send(json.dumps({"type": "text", "data": part.text}))
+            
+            # Handle Tool Use - executable_code (Google Search execution)
+            if hasattr(part, 'executable_code') and part.executable_code:
+                logger.info(f"Detected executable code: {part.executable_code.code}")
+                await websocket.send(json.dumps({
+                    "type": "tool_use",
+                    "data": {
+                        "tool": "google_search",
+                        "code": part.executable_code.code,
+                        "status": "executing"
+                    }
+                }))
+            
+            # Handle Tool Result - code_execution_result (Google Search result)
+            if hasattr(part, 'code_execution_result') and part.code_execution_result:
+                logger.info(f"Detected code execution result: {part.code_execution_result.output}")
+                await websocket.send(json.dumps({
+                    "type": "tool_result",
+                    "data": {
+                        "tool": "google_search", 
+                        "result": part.code_execution_result.output,
+                        "status": "completed"
+                    }
+                }))
 
     if server_content.turn_complete:
         await websocket.send(json.dumps({"type": "turn_complete"}))

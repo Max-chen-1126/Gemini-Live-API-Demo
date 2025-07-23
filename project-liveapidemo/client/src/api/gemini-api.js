@@ -35,6 +35,8 @@ export class GeminiAPI {
         this.onInterrupted = () => {};  // New callback for interruption events
         this.onInputTranscription = () => {};
         this.onOutputTranscription = () => {};
+        this.onToolUse = () => {};      // New callback for tool execution
+        this.onToolResult = () => {};   // New callback for tool results
         
         this.setupWebSocket();
     }
@@ -99,6 +101,12 @@ export class GeminiAPI {
                     console.log('Output transcription details - text:', response.data.text, 'is_final:', response.data.is_final);
                     console.log('Calling onOutputTranscription callback...');
                     this.onOutputTranscription(response.data);
+                } else if (response.type === 'tool_use') {
+                    console.log('Received tool use:', response.data);
+                    this.onToolUse(response.data);
+                } else if (response.type === 'tool_result') {
+                    console.log('Received tool result:', response.data);
+                    this.onToolResult(response.data);
                 } else {
                     console.log('Received unknown message type:', response);
                 }
