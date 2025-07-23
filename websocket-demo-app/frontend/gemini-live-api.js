@@ -28,6 +28,7 @@ class GeminiLiveAPI {
 
         this.responseModalities = ["AUDIO"];
         this.systemInstructions = "";
+        this.languageCode = "en-US";
 
         this.apiHost = apiHost;
         this.serviceUrl = `wss://${this.apiHost}/ws/google.cloud.aiplatform.v1beta1.LlmBidiService/BidiGenerateContent`;
@@ -112,12 +113,20 @@ class GeminiLiveAPI {
         };
         this.sendMessage(serviceSetupMessage);
 
+        const generationConfig = {
+            response_modalities: this.responseModalities,
+        };
+
+        if (this.languageCode) {
+            generationConfig.speech_config = {
+                language_code: this.languageCode,
+            };
+        }
+
         const sessionSetupMessage = {
             setup: {
                 model: this.modelUri,
-                generation_config: {
-                    response_modalities: this.responseModalities,
-                },
+                generation_config: generationConfig,
                 system_instruction: {
                     parts: [{ text: this.systemInstructions }],
                 },
