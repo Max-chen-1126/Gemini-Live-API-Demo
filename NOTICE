@@ -1,0 +1,29 @@
+Gemini Live API Demo
+Copyright 2025
+
+This project contains software from multiple sources:
+
+1. Project Livewire Components (project-liveapidemo/)
+   Original work by Heiko Hotz
+   Source: https://github.com/heiko-hotz/project-livewire
+   Licensed under Apache License 2.0
+
+2. Gemini TTS Demonstrations (test_gemini_native_api/, main.py, etc.)
+   Based on Google AI/GenAI SDK examples and documentation
+   Modified for educational and demonstration purposes
+
+3. Derivative Work Modifications:
+   - Chinese Traditional (zh-TW) localization
+   - Real-time transcription functionality  
+   - Enhanced mobile UI
+   - Audio processing improvements
+   - Project structure reorganization
+
+All original copyrights are retained as per Apache License 2.0 requirements.
+
+DISCLAIMER: This project is developed independently for educational and 
+demonstration purposes only. It is not intended for commercial use and 
+does not reflect the views or efforts of Google LLC, Anthropic, or any 
+other organization.
+
+This software is provided "AS IS" without warranty of any kind.
