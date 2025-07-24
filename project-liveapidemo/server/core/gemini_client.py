@@ -32,10 +32,10 @@ async def create_gemini_session():
 
         # Initialize development client with Google AI Studio API Key
         logger.info("Initializing Google AI Studio client")
-        
+
         client = genai.Client(
             vertexai=False,
-            http_options={"api_version": "v1alpha"},
+            http_options={"api_version": "v1alpha"},  # 很多功能 v1alpha
             api_key=api_config.api_key,
         )
 

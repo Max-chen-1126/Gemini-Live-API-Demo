@@ -49,7 +49,7 @@ class ApiConfig:
 api_config = ApiConfig()
 
 # Model configuration
-MODEL = os.getenv("MODEL", "models/gemini-2.0-flash-exp")
+MODEL = "models/gemini-live-2.5-flash-preview"
 VOICE = os.getenv("VOICE", "Kore")
 
 
