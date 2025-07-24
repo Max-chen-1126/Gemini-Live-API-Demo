@@ -200,7 +200,7 @@
       api.onToolUse = (data) => {
         logMessage(
           `🔍 正在執行 ${
-            data.tool === "google_search" ? "Google 搜尋" : data.tool
+            data.tool === "google_search" ? "Google Search" : data.tool
           }...`
         );
         logMessage(`執行代碼: ${data.code}`);
@@ -208,7 +208,7 @@
 
       api.onToolResult = (data) => {
         logMessage(
-          `✅ ${data.tool === "google_search" ? "Google 搜尋" : data.tool}完成`
+          `✅ ${data.tool === "google_search" ? "Google Search" : data.tool}完成`
         );
       };
 
