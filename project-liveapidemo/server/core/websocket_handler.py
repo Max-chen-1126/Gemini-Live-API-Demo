@@ -67,39 +67,35 @@ async def handle_messages(websocket: Any, session: SessionState) -> None:
             # Task 2: Handle responses from Gemini
             gemini_task = tg.create_task(handle_gemini_responses(websocket, session))
     except* Exception as eg:
-        handled = False
-        for exc in eg.exceptions:
-            if "Quota exceeded" in str(exc):
-                logger.info("Quota exceeded error occurred")
-                try:
-                    # Send error message for UI handling
-                    await send_error_message(
-                        websocket,
+        # Check if any exception is a "quota exceeded" error
+        if any("Quota exceeded" in str(exc) for exc in eg.exceptions):
+            logger.info("Quota exceeded error occurred")
+            try:
+                # Send error message for UI handling
+                await send_error_message(
+                    websocket,
+                    {
+                        "message": "Quota exceeded.",
+                        "action": "Please wait a moment and try again in a few minutes.",
+                        "error_type": "quota_exceeded",
+                    },
+                )
+                # Send text message to show in chat
+                await websocket.send(
+                    json.dumps(
                         {
-                            "message": "Quota exceeded.",
-                            "action": "Please wait a moment and try again in a few minutes.",
-                            "error_type": "quota_exceeded",
-                        },
+                            "type": "text",
+                            "data": "⚠️ Quota exceeded. Please wait a moment and try again in a few minutes.",
+                        }
                     )
-                    # Send text message to show in chat
-                    await websocket.send(
-                        json.dumps(
-                            {
-                                "type": "text",
-                                "data": "⚠️ Quota exceeded. Please wait a moment and try again in a few minutes.",
-                            }
-                        )
-                    )
-                    handled = True
-                    break
-                except Exception as send_err:
-                    logger.error(f"Failed to send quota error message: {send_err}")
-            elif "connection closed" in str(exc).lower():
-                logger.info("WebSocket connection closed")
-                handled = True
-                break
-
-        if not handled:
+                )
+            except Exception as send_err:
+                logger.error(f"Failed to send quota error message: {send_err}")
+        # If not, check if any exception is a "connection closed" error
+        elif any("connection closed" in str(exc).lower() for exc in eg.exceptions):
+            logger.info("WebSocket connection closed")
+        # If neither of the above are found, it's an unhandled exception.
+        else:
             # For other errors, log and re-raise
             logger.error(f"Error in message handling: {eg}")
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
@@ -200,14 +196,26 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
                     logger.debug(f"Received response from Gemini: {debug_response}")
 
                     # Log what attributes are available in server_content for debugging
-                    server_content_attrs = [attr for attr in dir(response.server_content) if not attr.startswith('_')]
+                    server_content_attrs = [
+                        attr
+                        for attr in dir(response.server_content)
+                        if not attr.startswith("_")
+                    ]
                     logger.debug(f"Server content attributes: {server_content_attrs}")
-                    
+
                     # Check for transcription attributes specifically
-                    has_input_transcription = hasattr(response.server_content, "input_transcription") and response.server_content.input_transcription
-                    has_output_transcription = hasattr(response.server_content, "output_transcription") and response.server_content.output_transcription
-                    logger.debug(f"Has input_transcription: {has_input_transcription}, Has output_transcription: {has_output_transcription}")
-                    
+                    has_input_transcription = (
+                        hasattr(response.server_content, "input_transcription")
+                        and response.server_content.input_transcription
+                    )
+                    has_output_transcription = (
+                        hasattr(response.server_content, "output_transcription")
+                        and response.server_content.output_transcription
+                    )
+                    logger.debug(
+                        f"Has input_transcription: {has_input_transcription}, Has output_transcription: {has_output_transcription}"
+                    )
+
                     # Process server content (including audio) immediately
                     await process_server_content(
                         websocket, session, response.server_content
@@ -219,7 +227,6 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
     except Exception as e:
         logger.error(f"Error in handle_gemini_responses: {e}")
         raise
-
 
 
 async def process_server_content(
@@ -246,7 +253,9 @@ async def process_server_content(
         and server_content.input_transcription
     ):
         transcription = server_content.input_transcription
-        logger.info(f"Input transcription received - text: '{transcription.text}', is_final: {transcription.finished}")
+        logger.info(
+            f"Input transcription received - text: '{transcription.text}', is_final: {transcription.finished}"
+        )
         transcription_data = {
             "type": "input_transcription",
             "data": {
@@ -254,7 +263,9 @@ async def process_server_content(
                 "is_final": transcription.finished,
             },
         }
-        logger.info(f"Sending input transcription to client: {json.dumps(transcription_data)}")
+        logger.info(
+            f"Sending input transcription to client: {json.dumps(transcription_data)}"
+        )
         await websocket.send(json.dumps(transcription_data))
 
     # Handle output transcription
@@ -263,7 +274,9 @@ async def process_server_content(
         and server_content.output_transcription
     ):
         transcription = server_content.output_transcription
-        logger.info(f"Output transcription received - text: '{transcription.text}', is_final: {transcription.finished}")
+        logger.info(
+            f"Output transcription received - text: '{transcription.text}', is_final: {transcription.finished}"
+        )
         transcription_data = {
             "type": "output_transcription",
             "data": {
@@ -271,7 +284,9 @@ async def process_server_content(
                 "is_final": transcription.finished,
             },
         }
-        logger.info(f"Sending output transcription to client: {json.dumps(transcription_data)}")
+        logger.info(
+            f"Sending output transcription to client: {json.dumps(transcription_data)}"
+        )
         await websocket.send(json.dumps(transcription_data))
 
     if server_content.model_turn:
@@ -285,30 +300,40 @@ async def process_server_content(
                 )
             elif part.text:
                 await websocket.send(json.dumps({"type": "text", "data": part.text}))
-            
+
             # Handle Tool Use - executable_code (Google Search execution)
-            if hasattr(part, 'executable_code') and part.executable_code:
+            if hasattr(part, "executable_code") and part.executable_code:
                 logger.info(f"Detected executable code: {part.executable_code.code}")
-                await websocket.send(json.dumps({
-                    "type": "tool_use",
-                    "data": {
-                        "tool": "google_search",
-                        "code": part.executable_code.code,
-                        "status": "executing"
-                    }
-                }))
-            
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "tool_use",
+                            "data": {
+                                "tool": "google_search",
+                                "code": part.executable_code.code,
+                                "status": "executing",
+                            },
+                        }
+                    )
+                )
+
             # Handle Tool Result - code_execution_result (Google Search result)
-            if hasattr(part, 'code_execution_result') and part.code_execution_result:
-                logger.info(f"Detected code execution result: {part.code_execution_result.output}")
-                await websocket.send(json.dumps({
-                    "type": "tool_result",
-                    "data": {
-                        "tool": "google_search", 
-                        "result": part.code_execution_result.output,
-                        "status": "completed"
-                    }
-                }))
+            if hasattr(part, "code_execution_result") and part.code_execution_result:
+                logger.info(
+                    f"Detected code execution result: {part.code_execution_result.output}"
+                )
+                await websocket.send(
+                    json.dumps(
+                        {
+                            "type": "tool_result",
+                            "data": {
+                                "tool": "google_search",
+                                "result": part.code_execution_result.output,
+                                "status": "completed",
+                            },
+                        }
+                    )
+                )
 
     if server_content.turn_complete:
         await websocket.send(json.dumps({"type": "turn_complete"}))

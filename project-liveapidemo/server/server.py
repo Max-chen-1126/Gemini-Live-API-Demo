@@ -20,8 +20,8 @@ import asyncio
 import logging
 import os
 
-from core.websocket_handler import handle_client
 import websockets
+from core.websocket_handler import handle_client
 
 # Configure logging
 logging.basicConfig(
