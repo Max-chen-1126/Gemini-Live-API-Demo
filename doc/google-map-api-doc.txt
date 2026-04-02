@@ -1,0 +1,2715 @@
+# Compute Routes Overview
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+[![](https://developers.google.com/static/maps/documentation/routes/images/routes_over.png "Try the demo")](https://developers.google.com/maps/documentation/routes/demo)
+
+## Introduction
+
+Compute Routes is a method in the Routes API service that accepts
+an HTTPS request and returns the ideal route between two locations.
+Provide directions with real-time traffic for transit, biking, driving,
+2-wheel motorized vehicles, or walking between multiple locations.
+
+**Need Route Matrixes?** If you are interested in a route matrix, see
+[Compute Route Matrix Overview](https://developers.google.com/maps/documentation/routes/compute-route-matrix-over).
+
+**Migrating?** If you are migrating from the Distance Matrix API (Legacy),
+see migration instructions starting with
+[Why migrate to the Routes API](https://developers.google.com/maps/documentation/routes/migrate-routes-why).
+
+## Why use Compute Routes
+
+With Compute Routes, with a wide
+range of route details you can route your vehicles or packages according to
+your preferences while optimizing for cost and quality.
+
+## What you can do with Compute Routes?
+
+With the Routes API `Compute Routes` method, you can
+do the following things:
+
+- **Get directions for different ways to travel**, and for a single or
+  multiple destinations:
+
+  - Modes of transportation: transit, driving, two-wheel vehicles,
+    walking, or bicycling.
+
+  - A series of waypoints that you can optimize for the most efficient
+    order in which to travel to them.
+
+- **Use multiple ways to specify origins, destinations, and waypoints**:
+
+  - Text strings. For example: "Chicago, IL", "Darwin, NT, Australia", "1800
+    Amphitheatre Parkway, Mountain View, CA 94043", or "CWF6+FWX Mountain
+    View, California"
+
+  - Place IDs
+
+  - Latitude and longitude coordinates, optionally with vehicle heading
+
+- **Fine-tune your route options** based on your needs and goals:
+
+  - Select fuel or energy-efficient routes for your vehicle's engine type:
+    Diesel, Electric, Hybrid, Gas. For more information, see
+    [Get an eco-friendly route](https://developers.google.com/maps/documentation/routes/eco-routes#request_an_eco-friendly_route).
+
+  - Set fine-grained options for traffic calculation, letting you make
+    quality versus latency trade off decisions. For details, see
+    [Specify how and if to include traffic data](https://developers.google.com/maps/documentation/routes/config_trade_offs).
+
+  - Set vehicle heading (direction of travel) and side-of-road information
+    for waypoints to increase ETA accuracy. For details, see
+    [Specify vehicle heading and side of road](https://developers.google.com/maps/documentation/routes/location_modifiers).
+
+  - Specify pass-through versus terminal locations and safe stopover
+    locations. For details, see [Set a stop along a route](https://developers.google.com/maps/documentation/routes/stop_over) and
+    [Set a point for a route to pass through](https://developers.google.com/maps/documentation/routes/pass-through).
+
+  - Request toll information, along with route distance and ETA. For
+    details, see
+    [Calculate toll fees for a route](https://developers.google.com/maps/documentation/routes/calculate_toll_fees).
+
+- **Control your latency and quality** by requesting only the data you need
+  using a field mask, which helps you avoid unnecessary processing time and
+  higher request billing rates. For details, see
+  [Choose what information to return](https://developers.google.com/maps/documentation/routes/choose_fields).
+
+## How Compute Routes works
+
+The Routes API `ComputeRoutes` method accepts an HTTP POST request with
+a JSON request body that contains the request details. Required are an origin,
+destination, `travelMode`, and a field mask to specify which fields to return.
+
+#### Example
+
+```json
+curl -X POST -d '{
+    "origin": {
+      "address": "1800 Amphitheatre Parkway, Mountain View, CA 94043"
+    },
+    "destination": {
+      "address": "Sloat Blvd &, Upper Great Hwy, San Francisco, CA 94132"
+    },
+  "travelMode": "DRIVE"
+  }' \
+  -H 'Content-Type: application/json' -H 'X-Goog-Api-Key: YOUR_API_KEY' \
+  -H 'X-Goog-FieldMask: routes.duration,routes.distanceMeters' \
+  'https://routes.googleapis.com/directions/v2:computeRoutes'
+```
+
+The service then calculates the requested route, and returns the fields you've
+requested.
+
+### Resources
+
+The following table summarizes the resources available through the
+Routes API Compute Routes method,
+along with the data it returns.
+
+<br />
+
+| Data resources | Data returned | Return format |
+|---|---|---|
+| [ComputeRoutes](https://developers.google.com/maps/documentation/routes/compute_route_directions) | Returns routes, legs, and steps for a route, with alternate routes, if requested. | JSON |
+
+<br />
+
+### How to use Compute Routes
+
+|---|---|---|
+| 1 | **Get set up** | Start with [Set up your Google Cloud project](https://developers.google.com/maps/documentation/routes/cloud-setup) and complete the setup instructions that follow. |
+| 2 | **Understand how the Routes API bills** | For information, see [Usage and billing](https://developers.google.com/maps/documentation/routes/usage-and-billing). |
+| 3 | **Compute a route and review the response** | For more information, see [Get a route](https://developers.google.com/maps/documentation/routes/compute_route_directions) and [Review the route responses](https://developers.google.com/maps/documentation/routes/understand-route-response). |
+
+### Available client libraries
+
+For a list of the available client libraries for
+Compute Routes, see
+[Client libraries](https://developers.google.com/maps/documentation/routes/client-libraries).
+
+## What's next
+
+- [Get a route](https://developers.google.com/maps/documentation/routes/compute_route_directions)
+- [Available route options](https://developers.google.com/maps/documentation/routes/route-opt)
+- [Choose what information to return](https://developers.google.com/maps/documentation/routes/choose_fields)
+- [Migrate from Directions API (Legacy)](https://developers.google.com/maps/documentation/routes/migrate-routes)
+- [Migrate from the Routes API preview to GA](https://developers.google.com/maps/documentation/routes/migrate-routes-preview)
+
+# What you can do with a route
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+A route is a navigable path between a start location, or origin, and an end
+location, or destination. You can choose to get a route for different modes of
+transportation, such as walking, biking, or different types of vehicles. You can
+also request route details such as distance, estimated time to navigate the
+route, expected tolls, and step-by-step instructions to navigate the route.
+
+You can use a route to help you determine the most efficient routes for dispatch
+scheduling, such as:
+
+- How best to assign a set of workers to pick up a series of packages
+
+- The best warehouse from which to ship packages to their final destination
+
+The Routes API provides several options to customize the types of routes
+and information provided in a route response. These guide topics can help you
+get started:
+
+| Topic | Description |
+|---|---|
+| **[Get a route](https://developers.google.com/maps/documentation/routes/compute_route_directions)** | Learn how to create a route matrix and what information you want in the response. |
+| **[Available route vehicle types](https://developers.google.com/maps/documentation/routes/vehicles)** | How to select what type of vehicle the route is for. |
+| **[Waypoint types and options](https://developers.google.com/maps/documentation/routes/waypoint-types)** | How to specify the location for waypoints, and options for specifying waypoints in between the origin and destination and how to handle those waypoints. |
+| **[Available traffic options](https://developers.google.com/maps/documentation/routes/traffic-opt)** | What traffic options you have, and how to select which to use when calculating a route and estimating travel duration. |
+| **[Available route options](https://developers.google.com/maps/documentation/routes/route-opt)** | How to customize your route, including optimizing your route waypoints and preferences for route features to avoid, such as tolls or ferries. |
+| **[Review the route response](https://developers.google.com/maps/documentation/routes/understand-route-response)** | Review how a route is returned from the Routes API, so you know how to handle the response in your application. |
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+You can get a route using the Routes API
+Compute Routes by sending an HTTP POST request to the
+[computeRoutes](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes) method (REST) or by
+calling the
+[ComputeRoutes](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#google.maps.routing.v2.Routes.ComputeRoutes)
+method (gRPC).
+
+The following example shows the URL of a REST request to the `computeRoutes`
+method:
+
+`https://routes.googleapis.com/directions/v2:computeRoutes`
+
+Include your request options in the JSON [request
+body](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#request-body). The request body
+contains the source and destination locations and any options that you want to
+set on the route. For more information, see [Specify
+locations](https://developers.google.com/maps/documentation/routes/specify_location) and [Available route options](https://developers.google.com/maps/documentation/routes/route-opt).
+
+The response contains the fields that you specified in the response field mask
+by using the URL parameter `$fields` or `field` information using the HTTP gRPC
+header `X-Goog-FieldMask`. For details, see [Choose what information to
+return](https://developers.google.com/maps/documentation/routes/choose_fields).
+
+For an example of a transit route request, see [Example: Get a route on
+transit](https://developers.google.com/maps/documentation/routes/transit-route#transit-route-example).
+
+## Example: HTTP route request
+
+The following code shows how to construct a request body for a
+[computeRoutes](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes) request. In this
+example, you set the source and destination locations and also specify:
+
+- A `travelMode` of `DRIVE` and a traffic-aware driving route.
+
+- A language of `en-US` with `metric` distance units. These
+  preferences apply only to the localized values, when requested.
+  `distanceMeters` is always provided in metric.
+
+- A response field mask in the `X-Goog-FieldMask` header that specifies to
+  return the following fields in the response:
+
+  - `routes.duration`
+  - `routes.distanceMeters`
+  - `routes.polyline.encodedPolyline`
+
+> [!NOTE]
+> **Note:** To decode the polyline returned in the response and see the route on a map, use the decode utility at [Interactive Polyline Encoder
+> Utility](https://developers.google.com/maps/documentation/utilities/polylineutility).
+
+```console
+curl -X POST -d '{
+  "origin":{
+    "location":{
+      "latLng":{
+        "latitude": 37.419734,
+        "longitude": -122.0827784
+      }
+    }
+  },
+  "destination":{
+    "location":{
+      "latLng":{
+        "latitude": 37.417670,
+        "longitude": -122.079595
+      }
+    }
+  },
+  "travelMode": "DRIVE",
+  "routingPreference": "TRAFFIC_AWARE",
+  "computeAlternativeRoutes": false,
+  "routeModifiers": {
+    "avoidTolls": false,
+    "avoidHighways": false,
+    "avoidFerries": false
+  },
+  "languageCode": "en-US",
+  "units": "METRIC"
+}' \
+-H 'Content-Type: application/json' -H 'X-Goog-Api-Key: YOUR_API_KEY' \
+-H 'X-Goog-FieldMask: routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline' \
+'https://routes.googleapis.com/directions/v2:computeRoutes'
+```
+
+## Example: HTTP route response body
+
+The call above generates the following JSON response:
+
+> [!NOTE]
+> **Note:** For detailed description of the response, see [Understand the compute
+> route response](https://developers.google.com/maps/documentation/routes/understand-route-response).
+
+```json
+{
+  "routes": [
+    {
+      "distanceMeters": 772,
+      "duration": "165s",
+      "polyline": {
+        "encodedPolyline": "ipkcFfichVnP@j@BLoFVwM{E?"
+      }
+    }
+  ]
+}
+```
+
+## Example: gRPC request
+
+[gRPC](https://www.grpc.io/) is a high performance, open source universal RPC
+framework developed by Google. In gRPC, a client application can directly call
+methods on a server application on a different machine as if it was a local
+object.
+
+The following shows an example gRPC request.
+
+### Go
+
+```go
+package main
+
+import (
+  "context"
+  "crypto/tls"
+  "fmt"
+  "log"
+  "time"
+
+  routespb "google.golang.org/genproto/googleapis/maps/routing/v2"
+  "google.golang.org/genproto/googleapis/type/latlng"
+  "google.golang.org/grpc"
+  "google.golang.org/grpc/credentials"
+  "google.golang.org/grpc/metadata"
+)
+
+const (
+  fieldMask  = "*"
+  apiKey     = "INSERT_API_KEY_HERE"
+  serverAddr = "routes.googleapis.com:443"
+)
+
+func main() {
+  config := tls.Config{}
+  conn, err := grpc.Dial(serverAddr,
+      grpc.WithTransportCredentials(credentials.NewTLS(&config)))
+  if err != nil {
+      log.Fatalf("Failed to connect: %v", err)
+  }
+  defer conn.Close()
+  client := routespb.NewRoutesClient(conn)
+  ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+  ctx = metadata.AppendToOutgoingContext(ctx, "X-Goog-Api-Key", apiKey)
+  ctx = metadata.AppendToOutgoingContext(ctx, "X-Goog-Fieldmask", fieldMask)
+  defer cancel()
+
+  // create the origin using a latitude and longitude
+  origin := &routespb.Waypoint{
+      LocationType: &routespb.Waypoint_Location{
+          Location: &routespb.Location{
+              LatLng: &latlng.LatLng{
+                  Latitude:  37.417670,
+                  Longitude: -122.0827784,
+              },
+          },
+      },
+  }
+
+  // create the destination using a latitude and longitude
+  destination := &routespb.Waypoint{
+      LocationType: &routespb.Waypoint_Location{
+          Location: &routespb.Location{
+              LatLng: &latlng.LatLng{
+                  Latitude:  37.417670,
+                  Longitude: -122.079595,
+              },
+          },
+      },
+  }
+  req := &routespb.ComputeRoutesRequest{
+      Origin:                   origin,
+      Destination:              destination,
+      TravelMode:               routespb.RouteTravelMode_DRIVE,
+      RoutingPreference:        routespb.RoutingPreference_TRAFFIC_AWARE,
+      ComputeAlternativeRoutes: true,
+      Units:                    routespb.Units_METRIC,
+      RouteModifiers: &routespb.RouteModifiers{
+          AvoidTolls:    false,
+          AvoidHighways: true,
+          AvoidFerries:  true,
+      },
+      PolylineQuality: routespb.PolylineQuality_OVERVIEW,
+  }
+
+  // execute rpc
+  resp, err := client.ComputeRoutes(ctx, req)
+
+  if err != nil {
+      // "rpc error: code = InvalidArgument desc = Request contains an invalid
+      // argument" may indicate that your project lacks access to Routes
+      log.Fatal(err)
+  }
+
+  fmt.Printf("Response: %v", resp)
+
+}
+    
+```
+
+### Java
+
+> [!NOTE]
+> **Note:**This example uses both the Compute Routes and Compute Route Matrix.
+
+```java
+package com.example;
+
+import com.google.maps.routing.v2.*;
+import com.google.type.LatLng;
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
+import io.grpc.ClientInterceptors;
+import io.grpc.ForwardingClientCall;
+import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
+import io.grpc.StatusRuntimeException;
+import io.grpc.netty.NettyChannelBuilder;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class RoutesClient {
+   // For more detail on inserting API keys, see:
+   // https://cloud.google.com/endpoints/docs/grpc/restricting-api-access-with-api-keys#java
+   // For more detail on system parameters (such as FieldMask), see:
+   // https://cloud.google.com/apis/docs/system-parameters
+   private static final class RoutesInterceptor implements ClientInterceptor {
+       private final String apiKey;
+       private static final Logger logger = Logger.getLogger(RoutesInterceptor.class.getName());
+       private static Metadata.Key<String> API_KEY_HEADER = Metadata.Key.of("x-goog-api-key",
+               Metadata.ASCII_STRING_MARSHALLER);
+       private static Metadata.Key<String> FIELD_MASK_HEADER = Metadata.Key.of("x-goog-fieldmask",
+               Metadata.ASCII_STRING_MARSHALLER);
+
+       public RoutesInterceptor(String apiKey) {
+           this.apiKey = apiKey;
+       }
+
+       @Override
+       public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,
+               CallOptions callOptions, Channel next) {
+           logger.info("Intercepted " + method.getFullMethodName());
+           ClientCall<ReqT, RespT> call = next.newCall(method, callOptions);
+           call = new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(call) {
+               @Override
+               public void start(Listener<RespT> responseListener, Metadata headers) {
+                   headers.put(API_KEY_HEADER, apiKey);
+                   // Note that setting the field mask to * is OK for testing, but discouraged in
+                   // production.
+                   // For example, for ComputeRoutes, set the field mask to
+                   // "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline"
+                   // in order to get the route distances, durations, and encoded polylines.
+                   headers.put(FIELD_MASK_HEADER, "*");
+                   super.start(responseListener, headers);
+               }
+           };
+           return call;
+       }
+   }
+
+   private static final Logger logger = Logger.getLogger(RoutesClient.class.getName());
+   private final RoutesGrpc.RoutesBlockingStub blockingStub;
+
+   public RoutesClient(Channel channel) {
+       blockingStub = RoutesGrpc.newBlockingStub(channel);
+   }
+
+   public static Waypoint createWaypointForLatLng(double lat, double lng) {
+       return Waypoint.newBuilder()
+               .setLocation(Location.newBuilder().setLatLng(LatLng.newBuilder().setLatitude(lat).setLongitude(lng)))
+               .build();
+   }
+
+   public void computeRoutes() {
+       ComputeRoutesRequest request = ComputeRoutesRequest.newBuilder()
+               .setOrigin(createWaypointForLatLng(37.420761, -122.081356))
+               .setDestination(createWaypointForLatLng(37.420999, -122.086894)).setTravelMode(RouteTravelMode.DRIVE)
+               .setRoutingPreference(RoutingPreference.TRAFFIC_AWARE).setComputeAlternativeRoutes(true)
+               .setRouteModifiers(
+                       RouteModifiers.newBuilder().setAvoidTolls(false).setAvoidHighways(true).setAvoidFerries(true))
+               .setPolylineQuality(PolylineQuality.OVERVIEW).build();
+       ComputeRoutesResponse response;
+       try {
+           logger.info("About to send request: " + request.toString());
+           response = blockingStub.withDeadlineAfter(2000, TimeUnit.MILLISECONDS).computeRoutes(request);
+       } catch (StatusRuntimeException e) {
+           logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+           return;
+       }
+       logger.info("Response: " + response.toString());
+   }
+
+   public void computeRouteMatrix() {
+       ComputeRouteMatrixRequest request = ComputeRouteMatrixRequest.newBuilder()
+               .addOrigins(RouteMatrixOrigin.newBuilder().setWaypoint(createWaypointForLatLng(37.420761, -122.081356))
+                       .setRouteModifiers(RouteModifiers.newBuilder().setAvoidTolls(false).setAvoidHighways(true)
+                               .setAvoidFerries(true)))
+               .addOrigins(RouteMatrixOrigin.newBuilder().setWaypoint(createWaypointForLatLng(37.403184, -122.097371)))
+               .addDestinations(RouteMatrixDestination.newBuilder()
+                       .setWaypoint(createWaypointForLatLng(37.420999, -122.086894)))
+               .addDestinations(RouteMatrixDestination.newBuilder()
+                       .setWaypoint(createWaypointForLatLng(37.383047, -122.044651)))
+               .setTravelMode(RouteTravelMode.DRIVE).setRoutingPreference(RoutingPreference.TRAFFIC_AWARE).build();
+       Iterator<RouteMatrixElement> elements;
+       try {
+           logger.info("About to send request: " + request.toString());
+           elements = blockingStub.withDeadlineAfter(2000, TimeUnit.MILLISECONDS).computeRouteMatrix(request);
+       } catch (StatusRuntimeException e) {
+           logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+           return;
+       }
+
+       while (elements.hasNext()) {
+           logger.info("Element response: " + elements.next().toString());
+       }
+   }
+
+   public static void main(String[] args) throws Exception {
+       String apiKey = System.getenv("INSERT_API_KEY_HERE");
+
+       // The standard TLS port is 443
+       Channel channel = NettyChannelBuilder.forAddress("routes.googleapis.com", 443).build();
+       channel = ClientInterceptors.intercept(channel, new RoutesInterceptor(apiKey));
+
+       RoutesClient client = new RoutesClient(channel);
+       client.computeRoutes();
+       client.computeRouteMatrix();
+   }
+}
+```
+
+### C#
+
+For an example using C#, see
+[Google.Maps.Routing.V2](https://googleapis.dev/dotnet/Google.Maps.Routing.V2/latest/index.html).
+
+### Node.js
+
+```javascript
+const protoPath = "YOUR_PROTO_PATH";
+const grpc = require("@grpc/grpc-js");
+const protoLoader = require("@grpc/proto-loader");
+const packageDefinition = protoLoader.loadSync(protoPath, {
+  keepCase: true,
+  longs: String,
+  enums: String,
+  defaults: true,
+  oneofs: true,
+});
+const protoDescriptor =
+  grpc.loadPackageDefinition(packageDefinition).google.maps.routing.v2;
+const metadata = new grpc.Metadata();
+const host = "routes.googleapis.com:443";
+const apiKey = "YOUR_API_KEY";
+const fieldMask = "*";
+let ComputeRoutesRequest = {
+  origin: {
+    location: {
+      lat_lng: {
+        latitude: -37.816,
+        longitude: 144.964,
+      },
+    },
+  },
+  destination: {
+    location: {
+      lat_lng: {
+        latitude: -37.815,
+        longitude: 144.966,
+      },
+    },
+  },
+  routing_preference: "TRAFFIC_AWARE",
+  travel_mode: "DRIVE",
+};
+const ssl_creds = grpc.credentials.createSsl();
+const call_creds = grpc.credentials.createFromMetadataGenerator(
+  function (args, callback) {
+    metadata.set("X-Goog-Api-Key", apiKey);
+    metadata.set("X-Goog-Fieldmask", fieldMask);
+    metadata.set("Content-Type", "application/json");
+    callback(null, metadata);
+  },
+);
+const credentials = grpc.credentials.combineChannelCredentials(
+  ssl_creds,
+  call_creds,
+);
+const client = new protoDescriptor.Routes(host, credentials);
+client.ComputeRoutes(ComputeRoutesRequest, (error, response) => {
+  if (error) {
+    console.log(error);
+    return;
+  } else if (response) {
+    console.log(response);
+  }
+});
+    
+```
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+<br />
+
+<br />
+
+# Choose fields to return
+
+When you request a route or route matrix, you must use a field mask to specify what information
+the response should return. There is no default list of returned fields. If you don't specify a field mask, the methods return an error.
+
+Using a field mask also ensures that you don't request
+unnecessary data, which in turn helps with response latency and avoids returning information your system doesn't need.
+
+You specify the list of the fields you need in a **response field mask** . You then pass
+the response field mask to either method by using the URL parameter `$fields` or
+`fields`, or by using the HTTP or gRPC header `X-Goog-FieldMask`.
+
+For more information about URL parameters, see
+[System Parameters](https://cloud.google.com/apis/docs/system-parameters).
+
+## Define a response field mask
+
+The response field mask is a comma-separated list of paths, where each
+path specifies a unique field in the response message.
+The path starts from the top-level response message and uses a
+dot-separated path to the specified field.
+
+Construct and specify a field path as follows:
+
+1. **Find the fields that contain the information you need** . For details, see [Field References](https://developers.google.com/maps/documentation/routes/choose_fields#field-ref).
+2. **Determine the paths for the fields you need and construct the field masks for them** : For details, see [Determine what field mask you want to use](https://developers.google.com/maps/documentation/routes/choose_fields#determine-field-mask).
+3. **Combine the field masks for all of the fields you need** , separating the field masks with commas. For example, to request the `distanceMeters` for the route leg, plus the duration for each route leg step, enter them both, separated by a comma, with no spaces:
+
+   ```
+   routes.legs.distanceMeters,routes.legs.steps.duration
+   ```
+4. **Send the field mask with your API request** . For example, in a curl request, you would specify the field mask with `-H` and `X-Goog-FieldMask`:
+
+   ```
+   -H X-Goog-FieldMask: routes.legs.distanceMeters,routes.legs.steps.duration
+   ```
+
+For examples and more details, see the following sections.
+
+### Field References
+
+To see the fields that you can request in a response through field masks, refer to the Routes API Compute Routes or Compute Route Matrix references linked in the following list. Specify fields in camel case as shown in the reference. For example, `routePreference`.
+
+> [!CAUTION]
+> In contrast, you must enter parameter **values** as shown. For example, for `routingPreference`, you must enter `TRAFFIC_AWARE`.
+
+These references include the fields that are available; however, you need to refer to the hierarchy of the fields to determine the full field mask path. For details on getting the hierarchy of the fields, see [Determine what field mask you want to use](https://developers.google.com/maps/documentation/routes/choose_fields#determine-field-mask).
+
+- **Compute route field mask**
+  - REST: Specifies the fields of the [Route](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#Route) object in the response to return, prefixed by `routes.`, for example, `routes.distanceMeters`.
+  - gRPC: Specifies the fields of the [Route](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#route) object in the response to return.
+- **Compute Route Matrix field masks**
+  - REST: Specifies the fields of the [Response body](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRouteMatrix#response-body) to return.
+  - gRPC: Specifies the fields of the [RouteMatrixElement](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#routematrixelement) object in the response to return.
+
+### Determine what field masks to use
+
+Here's how you can determine which fields you want to use, and construct the field masks for them:
+
+1. **Request all fields** using a field mask of `*`.
+
+   > [!CAUTION]
+   > **Caution:** While you can use this wildcard field mask while in development to determine what fields you need, don't use it in production. Requesting all fields in production results in higher costs and longer response times. Your cost may also increase unexpectedly as more advanced features are added, since this field mask will automatically include them. Instead, request only the fields you need to minimize your costs and request response time.
+
+2. **Look at the hierarchy of the fields** in the response for the fields you want.
+3. **Construct your field masks** using the hierarchy of the fields shown in the previous step, using this format:
+
+   ```
+   topLevelField[.secondLevelField][.thirdLevelField][...]
+   ```
+
+   > [!NOTE]
+   > **Note:** Don't use spaces anywhere in the list of field paths.
+
+For example, for this partial response from a route:
+
+```json
+"routes": [
+    {
+        "legs": [
+            {  "steps": [
+                    {"distanceMeters": 119},
+                    {"distanceMeters": 41}  ]
+            }
+        ],
+        "distanceMeters": 160
+    }
+]
+```
+
+If you want to return only the `distanceMeters` field for the route leg; that is, the last `distanceMeters` in the preceding sample, your field mask is as follows:
+
+```
+routes.legs.distanceMeters
+```
+
+If you want instead want to return the `distanceMeters` field for each step of the route leg; that is, the `distanceMeters` under `steps` in the preceding sample, your field mask is as follows:
+
+```
+routes.legs.steps.distanceMeters
+```
+
+If you want to return both, with the result above, your field mask is as follows:
+
+```
+routes.legs.distanceMeters,routes.legs.steps.distanceMeters
+```
+
+## Example field mask paths
+
+This section contains more examples on how to specify a field path as part of a response field mask in REST and gRPC calls.
+
+### REST call to `computeRoutes`
+
+In the first example, you use a REST call to the
+[`computeRoutes`](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes) method to calculate
+a route. In this example, in the header, you specify field masks to return the route `distanceMeters` and `duration` fields in the response. Remember to prefix the field name by `routes`.
+
+```restructuredtext
+X-Goog-FieldMask: routes.distanceMeters,routes.duration
+```
+
+### REST call to `computeRouteMatrix`
+
+For the REST [`computeRouteMatrix`](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRouteMatrix)
+method used to compute a route matrix, in the header, specify to return
+`originIndex`, `destinationIndex`, and `duration` for each combination of origin
+and destination:
+
+```restructuredtext
+X-Goog-FieldMask: originIndex,destinationIndex,duration
+```
+
+### gRPC call
+
+For gRPC, set a variable containing the response field mask. You can then pass that variable to the request.
+
+```
+const (
+  fieldMask = "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline"
+)
+```
+
+## Field path considerations
+
+Include only the fields that you require in the response to return just the
+fields that you need:
+
+- **Decreases processing times**, so your results are returned with a lower latency.
+- **Ensures stable latency performance**. If you select all fields, or if you select all fields at the top level, you might experience performance degradation when new fields are added and then are automatically included in your response.
+- **Results in a smaller response size**, which translates into higher network throughput.
+- **Ensures that you don't request unnecessary data**, which helps to avoid unnecessary processing time and billed charges.
+
+> [!NOTE]
+> **Note:** When a response message is parsed, and a field in the response message contains its default value, the field may be omitted from the response even if you specified it in the response field mask. For more information, see the [Language Guide (proto3)](https://developers.google.com/protocol-buffers/docs/proto3#default). For example, when you compute a route matrix, the `distanceMeters` field of the response can contain a value of 0, its default value. Because 0 is the default value of `distanceMeters`, it is omitted from the response.
+
+For more details on constructing a field mask, see the
+[field_mask.proto](https://github.com/protocolbuffers/protobuf/blob/master/src/google/protobuf/field_mask.proto).
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+To calculate a route, you must specify at a minimum the locations of the route
+origin and route destination. You define these locations as *waypoints* on the
+route.
+
+In addition to origin and destination, you can specify different types of
+waypoints and how to handle waypoints for a route. For more information and
+examples, see these topics:
+
+- [Specify vehicle heading and side of road](https://developers.google.com/maps/documentation/routes/location_modifiers)
+- [Specify intermediate waypoints](https://developers.google.com/maps/documentation/routes/intermed_waypoints)
+- [Set a stop along a route](https://developers.google.com/maps/documentation/routes/stop_over)
+- [Set a point for a route to pass through](https://developers.google.com/maps/documentation/routes/pass-through)
+- [Optimize the order of stops on your route](https://developers.google.com/maps/documentation/routes/opt-way)
+
+## Specify locations for a route
+
+You represent a location by creating a [Waypoint (REST)](https://developers.google.com/maps/documentation/routes/reference/rest/v2/Waypoint)
+or [Waypoint (gRPC)](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#waypoint) object. In the
+waypoint definition, you can specify a location in any of the following ways:
+
+- [Place ID](https://developers.google.com/maps/documentation/routes/specify_location#place_id) (preferred)
+- [Latitude/longitude coordinates](https://developers.google.com/maps/documentation/routes/specify_location#lat_long)
+- [Address string](https://developers.google.com/maps/documentation/routes/specify_location#text_string) ("Chicago, IL" or "Darwin, NT, Australia")
+- [Navigation point token](https://developers.google.com/maps/documentation/routes/specify_location#navigation_point_token)
+- [Plus Code](https://developers.google.com/maps/documentation/routes/specify_location#plus_code)
+
+You can specify locations for all waypoints in a request the same way,
+or you can mix them. For example, you can use latitude/longitude coordinates for
+the origin waypoint and use a place ID for the destination waypoint.
+
+For efficiency and accuracy, use place IDs instead of latitude/longitude
+coordinates or address strings. Place IDs are uniquely explicit and provide
+geocoding benefits for routing such as access points and traffic variables. They
+help avoid the following situations that can result from other ways of
+specifying a location:
+
+- Using latitude/longitude coordinates can result in the location being snapped to the road nearest to those coordinates - which might not be an access point to the property, or even a road that quickly or safely leads to the destination.
+- Address strings must first be geocoded by the Routes API to convert them to latitude/longitude coordinates before it can calculate a route. This conversion can affect performance.
+
+### Specify a location as a place ID
+
+You can use a place ID to specify the location of a waypoint. Because
+latitude and longitude coordinates are snapped to roads, you might find a
+place ID offers better results in some circumstances.
+
+Retrieve place IDs from the [Geocoding API](https://developers.google.com/maps/documentation/geocoding) and
+the [Places API](https://developers.google.com/maps/documentation/places/web-) (including Place
+Autocomplete). For more about place IDs, see the
+[Place ID overview](https://developers.google.com/maps/documentation/places/web-service/place-id).
+
+The following example uses the `placeId` property to pass a place ID for both
+the `origin` and `destination`:
+
+```json
+{
+  "origin":{
+    "placeId": "ChIJayOTViHY5okRRoq2kGnGg8o"
+  },
+  "destination":{
+    "placeId": "ChIJTYKK2G3X5okRgP7BZvPQ2FU"
+  },
+  ...
+}
+```
+
+### Specify a location as latitude and longitude coordinates
+
+To define location in a waypoint, specify the
+[Location (REST)](https://developers.google.com/maps/documentation/routes/reference/rest/v2/Location) or
+[Location(gRPC)](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#location) by using
+latitude/longitude coordinates.
+
+For example, specify a waypoint for the route `origin` and `destination`
+using `latitude` and `longitude` coordinates:
+
+```json
+{
+  "origin":{
+    "location":{
+      "latLng":{
+        "latitude": 37.419734,
+        "longitude": -122.0827784
+      }
+    }
+  },
+  "destination":{
+    "location":{
+      "latLng":{
+        "latitude": 37.417670,
+        "longitude": -122.079595
+      }
+    }
+  },
+...
+}
+```
+
+> [!NOTE]
+> **Note:** The points specified by latitude/longitude coordinates are snapped to roads and might not provide the accuracy your app needs. Use latitude/longitude coordinates when you are confident the values truly specify the points your app needs for routing without regard to possible access points or additional geocoding details.
+
+### Specify a location as an address string
+
+Address strings are literal addresses represented by a string (such as "1600
+Amphitheatre Parkway, Mountain View, CA"). Geocoding is the process of
+converting an address string into latitudes and longitude coordinates (such as
+latitude 37.423021 and longitude -122.083739).
+
+When you pass an address string as the location of a waypoint, Routes API
+internally geocodes the string to convert it to latitude and longitude
+coordinates.
+
+> [!NOTE]
+> **Note:** The latitude and longitude coordinates might be different from those returned by the [Geocoding API](https://developers.google.com/maps/documentation/geocoding). For example, Routes API might return coordinates for a building entrance rather than for its center.
+
+For example, to calculate a route you specify a waypoint for the route `origin` and
+`destination` using address strings:
+
+```json
+{
+  "origin":{
+    "address": "1600 Amphitheatre Parkway, Mountain View, CA"
+  },
+  "destination":{
+    "address": "450 Serra Mall, Stanford, CA 94305, USA"
+  },
+  ...
+}
+```
+
+In this example, the Routes API geocodes both addresses to convert them to
+latitude and longitude coordinates.
+
+If the address value is ambiguous, the Routes API might invoke a search to
+disambiguate from similar addresses. For example, "1st Street" could be a
+complete value or a partial value for "1st street NE" or "1st St SE". This
+result may be different from that returned by the Geocoding API. You can avoid
+possible misinterpretations using place IDs.
+
+#### Set the region for the address
+
+If you pass an incomplete address string as the location of a waypoint, the API
+might use the wrong geocoded latitude/longitude coordinates. For example,
+you make a request specifying "Toledo" as the origin and "Madrid" as the
+destination for a driving route:
+
+```json
+{
+  "origin":{
+    "address": "Toledo"
+  },
+  "destination":{
+    "address": "Madrid"
+  },
+  "travelMode": "DRIVE"
+}
+```
+
+In this example, "Toledo" is interpreted as a city in the state of
+Ohio in the United States, not in Spain. Therefore, the request returns
+an empty array, meaning no routes exists:
+
+```json
+{
+  []
+}
+```
+
+You can configure the API to return results biased to a particular region by
+including the `regionCode` parameter. This parameter specifies the region code as a
+[ccTLD ("top-level domain")](https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains#Country_code_top-level_domains)
+two-character value. Most ccTLD codes are identical to ISO 3166-1 codes, with
+some notable exceptions. For example, the United Kingdom's ccTLD is "uk"
+(.co.uk) while its ISO 3166-1 code is "gb" (technically for the entity of "The
+United Kingdom of Great Britain and Northern Ireland").
+
+A directions request for "Toledo" to "Madrid" that includes the `regionCode`
+parameter returns appropriate results because "Toledo" is interpreted as a
+city in Spain:
+
+```json
+{
+  "origin":{
+    "address": "Toledo"
+  },
+  "destination":{
+    "address": "Madrid"
+  },
+  "travelMode": "DRIVE",
+  "regionCode": "es"
+}
+```
+
+The response now contains the route calculated from Toledo, Spain to
+Madrid, Spain:
+
+```json
+{
+  "routes": [
+    {
+      "distanceMeters": 75330,
+      "duration": "4137s",
+      ...
+    }
+  ]
+}
+```
+
+### Specify a location as a navigation point token
+
+> [!WARNING]
+> This product or feature is in Preview (pre-GA). Pre-GA products and features might have limited support, and changes to pre-GA products and features might not be compatible with other pre-GA versions. Pre-GA Offerings are covered by the [Google
+> Maps Platform Service Specific Terms](https://cloud.google.com/maps-platform/terms/maps-service-terms). For more information, see the [launch stage
+> descriptions](https://developers.google.com/maps/launch-stages).
+
+A navigation point token is a string that encodes a location and additional route context. Navigation point tokens can provide precise routing to specific access points near entrances, loading docks, or designated pick-up areas. This is useful in cases like food delivery or
+rideshare, where the pickup or dropoff point may be ambiguous.
+
+You can obtain a navigation point token by calling the Destinations method of the [Geocoding API](https://developers.google.com/maps/documentation/geocoding).
+
+
+To specify a navigation point token:
+
+1. Obtain a `navigationPointToken` from the `SearchDestinations` method of the [Geocoding API](https://developers.google.com/maps/documentation/geocoding). [See the Geocoding API documentation for more information.](https://developers.google.com/maps/documentation/geocoding/navigation-point-tokens)
+2. Create a Waypoint by passing in the `navigationPointToken`.
+
+The following example uses the `navigation_point_token` property to pass a navigation point token for both the `origin` and `destination`:
+
+```json
+{
+  "origin":{
+    "navigation_point_token": "ENCODED_NAVIGATION_POINT_TOKEN_FOR_ORIGIN"
+  },
+  "destination":{
+    "navigation_point_token": "ENCODED_NAVIGATION_POINT_TOKEN_FOR_DESTINATION"
+  },
+  ...
+}
+```
+
+### Specify a location as a Plus Code
+
+Many people don't have a precise address, which can make it difficult for them
+to receive deliveries. Or, people with an address might prefer to accept
+deliveries at more specific locations, such as a back entrance or a loading
+dock.
+
+Plus Codes are like street addresses for people or places that don't have an
+actual address. Instead of addresses with street names and numbers, Plus Codes
+are based on latitude/longitude coordinates, and are displayed as numbers and
+letters.
+
+Google developed [Plus Codes](https://maps.google.com/pluscodes/)
+to give the benefit of addresses to everyone and everything. A Plus Code is an encoded
+location reference, derived from latitude/longitude coordinates, that
+represents an area: 1/8000th of a degree by 1/8000th of a degree (about 14m x
+14m at the equator) or smaller. You can use Plus Codes as a replacement for
+street addresses in places where they don't exist or where buildings are not
+numbered or streets are not named.
+
+Plus Codes must be formatted as a global code or a compound code:
+
+- A **global code** is composed of a 4 character **area code** and 6 character or longer **local code** .
+
+  For example, for the address "1600 Amphitheatre Parkway,
+  Mountain View, CA", the global code is "849V" and the local code is
+  "CWC8+R9". You then use the entire 10 character Plus Code to specify the
+  location value as "849VCWC8+R9".
+- A **compound code** is composed of a 6 character or longer **local code** combined with an explicit location.
+
+  For example, the address "450 Serra
+  Mall, Stanford, CA 94305, USA" has a local code of "CRHJ+C3". For a compound
+  address, combine the local code with the city, state, ZIP code, and country
+  portion of the address in the form "CRHJ+C3 Stanford, CA 94305, USA".
+
+  For example, calculate a route by specifying a waypoint for the route `origin`
+  and `destination` using Plus Codes:
+
+  ```json
+  {
+    "origin":{
+      "address": "849VCWC8+R9"
+    },
+    "destination":{
+      "address": "CRHJ+C3 Stanford, CA 94305, USA"
+    },
+    "travelMode": "DRIVE"
+  }
+  ```
+
+Plus Codes are supported in Google Maps Platform APIs including
+[Place Autocomplete](https://developers.google.com/maps/documentation/places/web-service/autocomplete),
+[Place Details](https://developers.google.com/maps/documentation/places/web-service/details),
+[Directions API (Legacy)](https://developers.google.com/maps/documentation/directions), and
+[Geocoding API](https://developers.google.com/maps/documentation/geocoding).
+For example, you can use Geocoding API to reverse geocoding a
+location specified by latitude/longitude coordinates to determine the
+location's Plus Code.
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+When the Routes API computes a route, it takes the waypoints and
+configuration parameters you provide as input. The API then returns a response
+that contains the *default* route and one or more alternative routes.
+
+Your response can include different types of routes and other data, based on the
+fields you request:
+
+| To include this in the response | See this documentation |
+|---|---|
+| The most fuel or energy efficient route based on the vehicle's engine type. | [Configure Eco-friendly routes](https://developers.google.com/maps/documentation/routes/eco-routes) |
+| Up to three alternative routes | [Request alternate routes](https://developers.google.com/maps/documentation/routes/alternative-routes) |
+| The polyline for an entire route, for each leg of a route, and for each step of a leg. | [Request route polylines](https://developers.google.com/maps/documentation/routes/traffic_on_polylines) |
+| The estimated tolls, taking into consideration any toll price discounts or passes available to the driver or vehicle. | [Calculate toll fees](https://developers.google.com/maps/documentation/routes/calculate_toll_fees) |
+| Localized responses by language codes and measurement unit (imperial or metric). | [Request localized values](https://developers.google.com/maps/documentation/routes/localized-values) |
+| To format the navigation instructions as an HTML text string, add `HTML_FORMATTED_NAVIGATION_INSTRUCTIONS` to `extraComputations`. | [Extra Computations](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#extracomputation) |
+
+For the complete list of input options, see [Available route options](https://developers.google.com/maps/documentation/routes/route-opt)
+and the
+[Request body](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#request-body).
+
+Using the response, you can provide your customers with the information
+necessary to select the appropriate route for their requirements.
+
+> [!NOTE]
+> **Note:** To get a better idea of how the API handles different types of route requests, [Try the demo](https://developers.google.com/maps/documentation/routes/demo). The demo lets you enter addresses and then view the response as visualized content.
+
+## About field masks
+
+When you call a method to compute a route, you must specify a field
+mask that defines which fields you want returned in the response. There is no
+default list of returned fields. If you omit this list, the methods return an
+error.
+
+The examples in this document show the entire response object without taking
+field masks into consideration. In a production environment, your response would
+only include the fields that you explicitly specify in the field mask.
+
+For more information, see [Choose what information to return](https://developers.google.com/maps/documentation/routes/choose_fields).
+
+## About displaying copyrights
+
+You must include the following copyright statement when displaying the results to your users:
+
+`Powered by Google, ©YEAR Google`
+
+For example:
+
+`Powered by Google, ©2023 Google`
+
+## About routes, legs, and steps
+
+Before looking at the response returned by the Routes API, you
+should have an understanding of the components that make up a route:
+
+![The route, leg, and step.](https://developers.google.com/static/maps/documentation/routes/images/route-leg-step.png)
+
+Your response may contain information about each of these route components:
+
+- **Route** : The entire trip from the origin waypoint, through any
+  intermediate waypoints, to the destination waypoint. A route consists of one
+  or more *legs*.
+
+- **Leg** : The path from one waypoint in a route to the next waypoint in the
+  route. Each leg consists of one or more discrete *steps*.
+
+  A route contains a separate leg for the path from each waypoint to the next.
+  For example, if the route contains a single origin waypoint and a single
+  destination waypoint, then the route contains a single leg. For each
+  additional waypoint you add to the route after the origin and destination,
+  called an *intermediate waypoint*, the API adds a separate leg.
+
+  The API does not add a leg for a *pass-through* intermediate waypoint. For
+  example, a route that contains an origin waypoint, a pass-through
+  intermediate waypoint, and a destination waypoint contains just one leg from
+  the origin to the destination, while passing through the waypoint. For more
+  information about pass-through waypoints, see
+  [Define a pass-through waypoint](https://developers.google.com/maps/documentation/routes/intermed_waypoints#define_a_pass-through_waypoint).
+- **Step**: A single instruction along the leg of a route. A step is the most
+  atomic unit of a route. For example, a step can indicate "Turn left on Main
+  Street''.
+
+## What's in the response
+
+The [JSON object](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#response-body)
+representing the API response contains the following top-level properties:
+
+- `routes`, an array of elements of type
+  [Route](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#Route).
+  The `routes` array contains one element for each route returned by the API.
+  The array can contain a maximum of five elements: the default route, the
+  eco-friendly route, and up to three alternative routes.
+
+- `geocodingResults`, an array of elements of type
+  [GeocodingResults](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#geocodingresults).
+  For every location in the request (origin, destination, or intermediate
+  waypoint) that you specified as an **address string** or as a **Plus code** ,
+  the API performs a place ID lookup. Each element of this array contains the
+  place ID corresponding to a location. Locations in the request specified as
+  a **place ID** or as **latitude/longitude coordinates** are not included.
+  If you've specified all locations using place IDs or latitude and longitude
+  coordinates, this array is not provided.
+
+- `fallbackInfo`, of type
+  [FallbackInfo](https://developers.google.com/maps/documentation/routes/reference/rest/v2/FallbackInfo).
+  If the API is not able to compute a route from all of the input properties,
+  it might fallback to using a different way of computation. When fallback
+  mode is used, this field contains detailed info about the fallback
+  response. Otherwise this field is unset.
+
+The response has the form:
+
+```json
+{
+  // The routes array.
+  "routes": [
+    {
+      object (Route)
+    }
+  ],
+  // The place ID lookup results.
+  "geocodingResults": [
+    {
+      object (GeocodedWaypoint)
+    }
+  ],
+  // The fallback property.
+  "fallbackInfo": {
+    object (FallbackInfo)
+  }
+}
+```
+
+### Decipher the routes array
+
+The response contains the `routes` array, where each array element is of type
+[Route](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#Route).
+Each array element represents an entire route from origin to destination. The
+API always returns at least one route, called the default route.
+
+You can request additional routes. If you request an
+[eco-friendly route](https://developers.google.com/maps/documentation/routes/eco-routes), then the array can contain two elements: the
+default route and the eco-friendly route. Or, set `computeAlternativeRoutes` to
+`true` in the request to add up to three alternative routes to the response.
+
+Each route in the array is identified with the `routeLabels` array property:
+
+| Value | Description |
+|---|---|
+| `DEFAULT_ROUTE` | Identifies the default route. |
+| `FUEL_EFFICIENT` | Identifies the eco-friendly route. |
+| `DEFAULT_ROUTE_ALTERNATE` | **I**ndicates an alternative route. |
+
+The `legs` array contains the definition of each leg of the route. The remaining
+properties, such as `distanceMeters`, `duration`, and `polyline,` contain
+information about the route as a whole:
+
+```json
+{
+  "routeLabels": [
+    enum (RouteLabel)
+  ],
+  "legs": [
+    {
+      object (RouteLeg)
+    }
+  ],
+  "distanceMeters": integer,
+  "duration": string,
+  "routeLabels": [string],
+  "staticDuration": string,
+  "polyline": {
+    object (Polyline)
+  },
+  "description": string,
+  "warnings": [
+    string
+  ],
+  "viewport": {
+    object (Viewport)
+  },
+  "travelAdvisory": {
+    object (RouteTravelAdvisory)
+  }
+  "routeToken": string
+}
+```
+
+Because of current driving conditions and other factors, the default route and
+the eco-friendly route can be the same. In this case, `routeLabels` array
+contains both labels: `DEFAULT_ROUTE` and `FUEL_EFFICIENT`.
+
+```json
+{
+  "routes": [
+    {
+      "routeLabels": [
+        "DEFAULT_ROUTE",
+        "FUEL_EFFICIENT"
+      ],
+     ...
+    }
+  ]
+}
+```
+
+### Understand the legs array
+
+Each `route` in the response contains a `legs` array, where each `legs` array
+element is of type
+[RouteLeg](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#routeleg).
+Each leg in the array defines the path from one waypoint to the next waypoint
+along the route. A route always contains at least one leg.
+
+The `legs` property contains the definition of each step along the leg in the
+`steps` array. The remaining properties, such as `distanceMeters`, `duration`,
+and `polyline` contain information about the leg.
+
+```json
+{
+  "distanceMeters": integer,
+  "duration": string,
+  "staticDuration": string,
+  "polyline": {
+    object (Polyline)
+  },
+  "startLocation": {
+    object (Location)
+  },
+  "endLocation": {
+    object (Location)
+  },
+  "steps": [
+    {
+      object (RouteLegStep)
+    }
+  ],
+  "travelAdvisory": {
+    object (RouteLegTravelAdvisory)
+  }
+}
+```
+
+### Understand the steps array
+
+Each leg in the response contains a `steps` array, where each `steps` array
+element is of type
+[RouteLegStep](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#routelegstep).
+A step corresponds to a single instruction along the leg. A leg always contains
+at least one step.
+
+Each element in the `steps` array includes the `navigationInstruction`
+property, of type
+[NavigationInstruction](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#navigationinstruction),
+which contains the step instruction. For example:
+
+```json
+"navigationInstruction": {
+  "maneuver": "TURN_LEFT",
+  "instructions": "Turn left toward Frontage Rd"
+}
+```
+
+The `instructions` might contain additional information about the step. For
+example:
+
+```json
+"navigationInstruction": {
+  "maneuver": "TURN_SLIGHT_LEFT",
+  "instructions": "Slight left (signs for I-90 W/Worcester)nParts of this road may be closed at certain times or days"
+}
+```
+
+The remaining properties in the step describe information about the step, such
+as `distanceMeters`, `duration`, and `polyline`:
+
+```json
+{
+  "distanceMeters": integer,
+  "staticDuration": string,
+  "polyline": {
+    object (Polyline)
+  },
+  "startLocation": {
+    object (Location)
+  },
+  "endLocation": {
+    object (Location)
+  },
+  "navigationInstruction": {
+    object (NavigationInstruction)
+  }
+}
+```
+
+### Specify the language of the step instructions
+
+The API returns route information in the local language, transliterated to a
+script readable by the user, if necessary, while observing the preferred
+language. Address components are all returned in the same language.
+
+- Use the `languageCode` parameter of a
+  [request](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#request-body) to
+  explicitly set the route language from the [list of supported
+  languages](https://developers.google.com/maps/faq#languagesupport). Google often updates the supported
+  languages, so this list may not be exhaustive.
+
+- If a name is not available in the specified language, the API uses the
+  closest match.
+
+- The specified language can influence the set of results that the
+  API chooses to return and the order in which they are returned. The
+  geocoder interprets abbreviations differently depending on language, such as
+  the abbreviations for street types, or synonyms that may be valid in one
+  language but not in another. For example, utca and tér are synonyms for
+  street in Hungarian.
+
+## Understand the geocodingResults array
+
+For every location in the request (origin, destination, or intermediate
+waypoint) that was specified as an **address string** or as a **Plus code** , the
+API attempts to find the most relevant location which has a corresponding place
+ID. Each element of the
+[`geocodingResults`](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#geocodingresults)
+array contains the `placeID` field
+containing the location as a place ID and a `type` field specifying the location
+type, such as `street_address`, `premise`, or `airport`.
+
+> [!NOTE]
+> **Note:** The API does not include locations in the request specified as a place ID or as latitude and longitude coordinates. If they are all in these formats, this array is not provided.
+
+The `geocodingResults` array contains three fields:
+
+- `origin`: If it was specified as an address string or as a Plus code, the
+  place ID of the origin. Otherwise, this field is omitted from the response.
+
+- `destination`: If it was specified as an address string or as a Plus code,
+  the place ID of the destination. Otherwise, this field is omitted from the
+  response.
+
+- `intermediates`: An array containing the place ID of any intermediate
+  waypoints specified as an address string or as a Plus code. If you specify
+  an intermediate waypoint using a place ID or latitude and
+  longitude coordinates, it is omitted from the response. Use the
+  `intermediateWaypointRequestIndex` property in the response to determine
+  which intermediate waypoint in the request corresponds to the place ID in
+  the response.
+
+> [!NOTE]
+> **Note:** If a requested location does not exist or cannot be found, the API still populates the `geocodingResults` array in the response. However, the `routes` array is empty because no route can be computed for a location that cannot be found.
+
+```json
+"geocodingResults": {
+    "origin": {
+        "geocoderStatus": {},
+        "type": [
+             enum (Type)
+        ],
+        "placeId": string
+    },
+    "destination": {
+        "geocoderStatus": {},
+        "type": [
+            enum (Type)
+        ],
+        "placeId": string
+    },
+    "intermediates": [
+        {
+            "geocoderStatus": {},
+            "intermediateWaypointRequestIndex": integer,
+            "type": [
+                enum (Type)
+            ],
+            "placeId": string
+        },
+        {
+           "geocoderStatus": {},
+           "intermediateWaypointRequestIndex": integer,
+            "type": [
+                enum (Type)
+            ],
+            "placeId": string
+        }
+    ]
+}
+```
+
+## Understand localized response values
+
+Localized response values are an additional response field that provides
+localized text for returned parameter values. Localized text is provided for
+trip duration, distance, and unit system (metric or imperial). You request
+localized values using a field mask, and can either specify the language and
+unit system or use the values inferred by the API. For details, see
+[LocalizedValues](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#routelegsteplocalizedvalues).
+
+For example, if you specify a language code for German (de) and imperial
+units, you get a value for `distanceMeters` of 49889.7,
+but also localized text providing that distance measurement in German and
+imperial units, so "31 Meile."
+
+Here is an example of what you would see for localized values:
+
+```restructuredtext
+{ "localized_values":
+  {
+    "distance": { "text": "31,0 Meile/n" },
+    "duration": { "text": 38 Minuten}.
+    "static_duration": { "text": 36 Minuten}.
+  }
+}
+```
+
+> [!NOTE]
+> Note: You get two values for the expected duration: `duration` uses the traffic model you specify, and `static_duration` does not take traffic into account. So, if your requested traffic model is `TRAFFIC_UNAWARE` these times are identical.
+
+If you don't specify the language or unit system, the API infers the language
+and units as follows:
+
+- The `ComputeRoutes` method infers the location and distance units from the origin waypoint. So for a routing request in the US, the API infers `en-US` language and `IMPERIAL` units.
+- The `ComputeRouteMatrix` method defaults to 'en-US' language and METRIC units.
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+The Routes API returns error messages as part of the
+response to a method call. For example, if you omit the API key from the
+request, the method returns:
+
+```json
+{
+  "error": {
+    "code": 403,
+    "message": "The request is missing a valid API key.",
+    "status": "PERMISSION_DENIED"
+  }
+}
+```
+
+If you omit a required body parameter, such as `origin`, the method
+returns:
+
+```json
+{
+  "error": {
+    "code": 400,
+    "message": "Origin and destination must be set.",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+```
+
+For more information on errors and error handling, see
+[Errors](https://cloud.google.com/apis/design/errors).
+
+# Get a two-wheeled vehicle route
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+Two-wheeled refers to two-wheeled motorized vehicles (for example, motorcycles).
+The two-wheeler travel mode differs from the bicycle travel mode, which is a
+human-powered travel mode.
+
+> [!CAUTION]
+> **Caution:** Requests using a travel mode of `TWO_WHEELER` are billed at a higher rate. [Learn more about billing](https://developers.google.com/maps/documentation/routes/usage-and-billing) for Routes API.
+
+Use the `travelMode` property of a request to specify the mode. The possible
+values of this property are defined by enumerations in
+[RouteTravelMode](https://developers.google.com/maps/documentation/routes/reference/rest/v2/RouteTravelMode) (REST) and
+[RouteTravelMode](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#routetravelmode) (gRPC).
+
+<br />
+
+> [!NOTE]
+> **Note:**Walking, bicycling, and two-wheel routes are in beta and might sometimes be missing clear sidewalks, pedestrian paths, or bicycling paths. You must display this warning to the user for all walking, bicycling, and two-wheel routes that you display in your app.
+
+<br />
+
+## Specify the two-wheeler travel mode
+
+When you call a Routes API, you specify the `RouteTravelMode`
+enumeration value to specify the travel mode.
+
+The following example shows how to set the travel mode to `TWO_WHEELER`
+in a [computeRoutes](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes) method (REST)
+request body. You can also specify this option to the
+[ComputeRoutes](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#google.maps.routing.v2.Routes.ComputeRoutes)
+method (gRPC).
+
+In this example, you compute the directions between two locations in India
+specified by Plus codes:
+
+```json
+{
+  "origin":{
+    "address": "H8MW+WP Kolkata India"
+  },
+  "destination":{
+    "address": "GCG2+3M Kolkata India"
+  },
+  "travelMode":"TWO_WHEELER"
+}
+```
+
+> [!NOTE]
+> **Note:** For details on supported routes for 2-wheeled vehicles, see [Countries and regions supported for two-wheeled vehicles](https://developers.google.com/maps/documentation/routes/coverage-two-wheeled).
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+A transit route provides navigation instructions using the public transportation
+options available in the region. Transit options may include buses, subways, and
+trains, among others. A transit route also usually includes instructions on
+walking to, from, and between transit stations. Because a transit route
+typically requires you to travel using more than one mode of travel, how you
+request the route and some parts of the response are different.
+
+> [!NOTE]
+> **Note:** You can also get a route matrix on transit. For an example, see [Get a route matrix on transit](https://developers.google.com/maps/documentation/routes/transit-rm).
+
+## How transit routes differ from other routes
+
+Transit routes, which you request by setting a travelMode of TRANSIT, differ
+from routes using different travelMode options.
+You cannot request all of the same objects and options, and the response returns
+different fields, when compared to other routes.
+
+In the Routes API, steps are consistently one navigation instruction
+across all types of travel. So each navigation instruction is a step. A transit
+route response is very similar to routes with other travel modes, with a few key
+differences:
+
+| Request differences | Response differences |
+|---|---|
+| You cannot specify intermediate waypoints. | Includes Transit details. |
+| Cannot get eco-friendly routes | Includes metadata for each travel mode that contains the summary of the steps for that travel mode, in the \`stepsOverview\` (to request this metadata, use the \`routes.legs.stepsOverview\` field mask). |
+| Cannot specify how and if to include traffic data |   |
+| Cannot specify route features to avoid |   |
+| Can only specify `transitPreferences` for `routingPreference`. For details, see [`TransitPreferences`](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TransitPreferences). |   |
+
+For more information about the response returned by the Routes API, see
+[Review transit route responses](https://developers.google.com/maps/documentation/routes/transit-route#transit-route-example).
+
+## To get a transit route
+
+1. Set your origin and destination.
+
+   > [!NOTE]
+   > **Note:** Transit routes don't support intermediate waypoints.
+
+2. Set the travel mode to transit:
+
+   `travelMode: "TRANSIT"`
+3. Add a field mask to get the response fields you want. See
+   [Request the transit route fields you need](https://developers.google.com/maps/documentation/routes/transit-route#transit-fields).
+
+4. If needed, set optional parameters. See
+   [Set parameters for a transit route](https://developers.google.com/maps/documentation/routes/transit-route#options).
+
+### Request the transit route fields you need
+
+Request the transit route fields you need using field masks. The following table
+contains some suggested responses for a transit
+route, and the field mask to use to request them.
+
+| To request this information | Use this field mask |
+|---|---|
+| All route details | `routes.*` |
+| All transit details | `routes.legs.steps.transitDetails` |
+| Start location for each leg | `routes.legs.steps.startLocation` |
+| End location for each leg | `routes.legs.steps.endLocation` |
+| Route polyline for each step | `routes.legs.steps.polyline` |
+| Type of transit used for each step | `routes.legs.steps.travelMode` |
+| Estimated fare for each step and the route, and Localized estimated fare | `routes.travel_advisory.transitFare localized routes.localizedValues.transitFare` Note: `transitFare` is only provided if the API can determine transit fare information for all steps. |
+| Localized text for duration and distance | `routes.localizedValues` |
+
+For more information about setting field masks, see
+[Choose fields to return](https://developers.google.com/maps/documentation/routes/choose_fields).
+
+### Set parameters for a transit route
+
+Here are the relevant parameters for transit routes:
+
+| To do this | Use this parameter | Notes |
+|---|---|---|
+| Select transit mode | `travelMode: "TRANSIT"` | Required. [Learn more](https://developers.google.com/maps/documentation/routes/reference/rest/v2/RouteTravelMode). |
+| Set an arrival or departure time | `"arrivalTime": "yyyy-mm-ddThh:mm:ssZ"` OR `"departureTime": "yyyy-mm-ddThh:mm:ssZ"` | Optional. You can specify either arrival_time or departure_time. If neither time is specified, the `departure_time` defaults to the current execution time (`now`). You can set arrival and departure times only within the following time window, with the current execution time (`now`) as the reference: - up to and including 7 days prior to `now` - up to and including 100 days after `now` Time is expressed as a timestamp in RFC3339 UTC "Zulu" format. [Learn more](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#request-body) Note: Transit schedules change frequently, available transit trips may change over time and there is no guarantee to provide consistent results for predictions far in advance. |
+| Include alternate routes | `"computeAlternativeRoutes": true` | Optional. Set to true to have Compute Routes compute up to 3 additional routes, when available. [Learn more](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TopLevel/computeRoutes#request-body) |
+| Specify preferences for the transit type | `"transitPreferences": { allowedTravelModes: ["BUS","SUBWAY","TRAIN","LIGHT_RAIL","RAIL"]}` Note: If you specify a preferred travel mode, returned routes may still use other transit modes, even only use other transit modes, depending on the efficiency of the route on, and the availability of, the preferred travel. | Optional. Specify preferred transit travel modes. [Learn more](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TransitPreferences) |
+| Specify preferences for the transit route | `"transitPreferences": {routingPreference: "LESS_WALKING|FEWER_TRANSFERS"}` | Optional. Specify transit routing preferences. [Learn more](https://developers.google.com/maps/documentation/routes/reference/rest/v2/TransitPreferences) |
+
+## Example: Get a route on transit
+
+The following example gets a route on transit with the following parameters:
+
+- Specifies preferences for travel on a train and less walking.
+
+- Requests alternate routes.
+
+- Provides a field mask that returns the transit details:
+
+```json
+curl -X POST -H 'content-type: application/json' -d '{
+  "origin": {
+    "address": "Humberto Delgado Airport, Portugal"
+  },
+  "destination": {
+    "address": "Basílica of Estrela, Praça da Estrela, 1200-667 Lisboa, Portugal"
+  },
+  "travelMode": "TRANSIT",
+  "computeAlternativeRoutes": true,
+  "transitPreferences": {
+     routingPreference: "LESS_WALKING",
+     allowedTravelModes: ["TRAIN"]
+  },
+}' \
+-H 'Content-Type: application/json' \
+-H 'X-Goog-Api-Key: YOUR_API_KEY' \
+-H 'X-Goog-FieldMask: routes.legs.steps.transitDetails' \
+'https://routes.googleapis.com/directions/v2:computeRoutes'
+```
+
+The response shows `route.legs.steps.transitDetails` fields for the two routes:
+
+```json
+{
+  "routes": [
+    {
+    "legs": [
+        {
+        "steps": [
+          {},
+          {},
+          {},
+          {
+          "transitDetails": {
+            "stopDetails": {
+            "arrivalStop": {
+              "name": "Saldanha",
+              "location": {
+                "latLng": {
+                  "latitude": 38.73532,
+                  "longitude": -9.14543
+                }
+              }
+            },
+            "arrivalTime": "2023-08-26T10:49:42Z",
+            "departureStop": {
+              "name": "Aeroporto",
+              "location": {
+                "latLng": {
+                  "latitude": 38.769047799999996,
+                  "longitude": -9.1284593
+                }
+              }
+            },
+            "departureTime": "2023-08-26T10:32:10Z"
+              },
+              "localizedValues": {
+              "arrivalTime": {
+                  "time": {
+                    "text": "11:49"
+                  },
+                  "timeZone": "Europe/Lisbon"
+              },
+              "departureTime": {
+                "time": {
+                  "text": "11:32"
+                },
+                "timeZone": "Europe/Lisbon"
+              }
+            },
+              "headsign": "São Sebastião",
+              "transitLine": {
+                "agencies": [
+                  {
+                    "name": "Metropolitano de Lisboa, E.P.E.",
+                    "phoneNumber": "+351 21 350 0115",
+                    "uri": "https://www.metrolisboa.pt/"
+                  }
+                ],
+                "name": "Vermelha",
+                "color": "#f23061",
+                "nameShort": "Vm",
+                "textColor": "#000000",
+                "vehicle": {
+                  "name": {
+                    "text": "Metrô"
+                  },
+                "type": "SUBWAY",
+                "iconUri": "//maps.gstatic.com/mapfiles/transit/iw2/6/subway2.png"
+                }
+              },
+              "stopCount": 11
+            }
+          },
+        {},
+        {
+          "transitDetails": {
+            "stopDetails": {
+              "arrivalStop": {
+                "name": "Rato",
+                "location": {
+                  "latLng": {
+                    "latitude": 38.7201022,
+                    "longitude": -9.1540562
+                  }
+              }
+            },
+            "arrivalTime": "2023-08-26T11:01:37Z",
+            "departureStop": {
+              "name": "Saldanha",
+                "location": {
+                  "latLng": {
+                    "latitude": 38.73527,
+                    "longitude": -9.1455200000000012
+                  }
+                }
+              },
+              "departureTime": "2023-08-26T10:57:57Z"
+            },
+            "localizedValues": {
+              "arrivalTime": {
+                "time": {
+                  "text": "12:01"
+                },
+                "timeZone": "Europe/Lisbon"
+              },
+              "departureTime": {
+                "time": {
+                  "text": "11:57"
+                },
+                "timeZone": "Europe/Lisbon"
+              }
+            },
+            "headsign": "Rato",
+            "transitLine": {
+              "agencies": [
+                {
+                "name": "Metropolitano de Lisboa, E.P.E.",
+                "phoneNumber": "+351 21 350 0115",
+                "uri": "https://www.metrolisboa.pt/"
+                }
+              ],
+              "name": "Amarela",
+              "color": "#f2c200",
+              "nameShort": "Am",
+              "textColor": "#000000",
+              "vehicle": {
+                "name": {
+                  "text": "Metrô"
+                },
+                "type": "SUBWAY",
+                "iconUri": "//maps.gstatic.com/mapfiles/transit/iw2/6/subway2.png"
+              }
+            },
+            "stopCount": 4
+          }
+        },
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+        ]
+      }
+    ]
+  }
+]
+}
+```
+
+# Set the level of traffic data
+
+**European Economic Area (EEA) developers**
+
+> [!NOTE]
+> If your billing address is in the European Economic Area, effective on 8 July 2025, the [Google Maps Platform EEA Terms of Service](https://cloud.google.com/terms/maps-platform/eea) will apply to your use of the Services. Functionality varies by region. [Learn more](https://developers.google.com/maps/comms/eea/faq).
+
+The traffic preferences you select balance the accuracy of the route details
+with request performance in one of two ways:
+
+- **Traffic aware** -- Return the most accurate results possible (higher
+  latency).
+
+- **Traffic unaware** -- Return the results as quickly as possible (lowest
+  latency).
+
+When you make a request, weigh whether it is better to return the most accurate
+results possible, or to return results as quickly as possible. The
+Routes API provides options that let you control the quality of the
+response data versus the latency of the response.
+
+## How to set the traffic level
+
+The Routes API provides
+[RoutingPreference](https://developers.google.com/maps/documentation/routes/reference/rest/v2/RoutingPreference) (REST) and
+[RoutingPreference](https://developers.google.com/maps/documentation/routes/reference/rpc/google.maps.routing.v2#routingpreference)
+(gRPC) that let you specify routing preferences for calculating routes.
+
+The default is traffic unaware results. You select traffic options with the
+`TRAFFIC_UNAWARE`, `TRAFFIC_AWARE` and `TRAFFIC_AWARE_OPTIMAL` routing
+preferences. Each routing preference produces results that differ in route
+quality, estimated ETA, and response latency.
+
+> [!CAUTION]
+> **Caution:** Requests using `TRAFFIC_AWARE` and `TRAFFIC_AWARE_OPTIMAL` are billed at a higher rate. [Learn more about billing](https://developers.google.com/maps/documentation/routes/usage-and-billing).
+
+### Traffic conditions
+
+Traffic conditions characterize the rate of traffic flow:
+
+- **Normal traffic**: No congestion with traffic flowing at a normal speed.
+
+- **Light to moderate traffic**: Increasing congestion, with traffic flowing
+  at a reduced speed.
+
+- **Heavy traffic**: Severe congestion, with heavily reduced traffic speed.
+
+### Traffic unaware
+
+`TRAFFIC_UNAWARE` is the default setting. Use this routing preference when you
+want responses returned the quickest, and approximate routing details are good
+enough.
+
+`TRAFFIC_UNAWARE` routes are calculated without accounting for current traffic
+conditions. This routing preference results in the fastest request response
+(lowest latency).
+
+If you choose `TRAFFIC_UNAWARE`,
+the route and duration chosen are based on road network and average time-independent
+traffic conditions, not current road conditions. Consequently, routes may include roads
+that are temporarily closed. Results for a given request may vary over time
+due to changes in the road network, updated average traffic conditions,
+and the distributed nature of the service. Results may also vary between
+nearly-equivalent routes at any time or frequency.
+
+Here are the responses you'll see:
+
+- `duration` - Contains the ETA for the route.
+
+- `staticDuration`: The ETA for the route considering only historical traffic
+  information. For `TRAFFIC_UNAWARE`, this contains the same value as
+  `duration`.
+
+### Traffic aware
+
+Use this routing preference when you want more accurate routing details than
+`TRAFFIC_UNAWARE`, and yet you don't mind if responses are returned with a
+moderate increase in latency.
+
+When you set the `TRAFFIC_AWARE` routing preference, the service calculates the
+route considering current traffic conditions. As a result, the route and route
+details more accurately reflect real-world conditions. Because this increase in
+data quality comes at the expense of response latency, performance optimizations
+are applied to reduce much of the latency.
+
+Here are the responses you'll see:
+
+- `duration`: The ETA considering real-time traffic information.
+
+- `staticDuration` The ETA for the route considering only historical traffic
+  information.
+
+### Traffic aware optimal
+
+Use this routing preference when you want results of the highest quality without
+regard to how long responses take. This routing preference has the longest delay
+in returning responses (highest latency).
+
+When you set the `TRAFFIC_AWARE_OPTIMAL` routing preference, the service
+calculates the route considering current traffic conditions, but doesn't apply
+performance optimizations. In this mode, the server performs a more exhaustive
+search of the road network to find the optimal route.
+
+The `TRAFFIC_AWARE_OPTIMAL` routing preference is equivalent to the mode used by
+[maps.google.com](https://www.google.com/maps) and by the
+Google Maps mobile app.
+
+When you use this option with Compute Route Matrix, the number of
+elements in a request (number of origins × number of destinations) is limited.
+For more on Compute Route Matrix limits, see [Compute a route matrix](https://developers.google.com/maps/documentation/routes/compute_route_matrix).
+
+Here are the responses you'll see:
+
+- `duration`: The ETA for the route considering real-time traffic information.
+
+- `staticDuration`: The ETA for the route considering only historical traffic
+  information.
+
+## Set departure time (optional)
+
+Use this property only for traffic aware requests where the departure time needs
+to be in the future. If you don't set the `departureTime` property, it defaults
+to the time that you make the request.
+
+Use the `departureTime` property along with the `TRAFFIC_AWARE` and
+`TRAFFIC_AWARE_OPTIMAL` options when you want to adjust the way the service
+predicts traffic when choosing a route.
+
+- `TRAFFIC_UNAWARE`: **Not recommended** because the choice of route and
+  duration are based on the road network and average time-independent traffic
+  conditions.
+
+- `TRAFFIC_AWARE` and `TRAFFIC_AWARE_OPTIMAL`:
+  **Recommended for departures happening in the near future** because these
+  preferences take live traffic conditions into consideration. Live traffic
+  becomes more important and relevant the closer the `departureTime` is to
+  now. The farther ahead you set the departure time into the future, the more
+  consideration is given to historical traffic conditions in selecting routes.
+
+## Example: How to select traffic aware routing
+
+The following JSON code demonstrates how to set the `TRAFFIC_AWARE_OPTIMAL`
+routing preference in a request message entity body.
+
+```
+{
+  "origin":{
+    "location":{
+      "latLng":{
+        "latitude":37.419734,
+        "longitude":-122.0827784
+      }
+    }
+  },
+  "destination":{
+    "location":{
+      "latLng":{
+        "latitude":37.417670,
+        "longitude":-122.079595
+      }
+    }
+  },
+  "travelMode":"DRIVE",
+  "routingPreference":"TRAFFIC_AWARE_OPTIMAL"
+}
+```
+
+## Configure traffic on polylines
+
+The Routes API lets you request information about traffic conditions
+along a *traffic-aware polyline* . See
+[Request polylines](https://developers.google.com/maps/documentation/routes/traffic_on_polylines) for more information.
+
+# Overview of search along route
+
+Search along route features are available in the following Places (New) APIs:
+
+- **Text Search (New) only:** Search for places along a predefined trip route.
+- **Text Search (New) and Nearby Search (New):** Calculate the routing summary from a specified routing origin location to each place in the search results.
+- **Text Search (New) only:** Calculate the routing summary for each place along a predefined trip route.
+
+## Search along a route
+
+You use the [Routes API](https://developers.google.com/maps/documentation/routes) to calculate the trip route
+between two locations. The Routes API can calculate a route for a car, bicycle,
+two-wheel vehicle, transit system, or for walking.
+
+> [!NOTE]
+> **Note:** Transit system routes are not supported by the Places API.
+
+[Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) lets you use this calculated route to perform a
+**search along a route**. With this option, you pass the precalculated route
+from the Routes API to the Text Search (New) request. The response then contains
+places that match the search criteria and are also located near the specified
+route.
+
+Searching along a route is similar to using the `locationRestriction` or
+`locationBias` request options to bias the search results. `locationRestriction`
+returns search results that fall within the viewport bounds, while
+`locationBias` may return search results outside of the viewport. However, while
+the `locationBias` and `locationRestriction` options let you specify a region to
+bias the search results, the search along route feature in Text Search also lets
+you bias the search results to include those with minimal detour times from the
+route origin to the route destination. You can bias search results using either
+`locationBias` or `locationRestriction` in combination with the polyline.
+
+For example, consider the route from the origin, referred to as a
+**waypoint** in the Routes API, to the destination as calculated by the Routes
+API:
+![Route from the origin waypoint to the destination with search results.](https://developers.google.com/static/maps/documentation/places/images/searchAlongRoute.svg)
+
+When you search along the route, the search is biased to return places near the
+route with minimal detour times from the origin to the destination. In this
+example, points A, B, and C are places returned by the search.
+
+## Calculate routing summary
+
+[Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) and [Nearby Search (New)](https://developers.google.com/maps/documentation/places/web-service/nearby-search) can
+calculate the **routing summary** , meaning the duration and distance, to each
+place in the response based on the specified **routing origin location** in the
+request. When you specify the routing origin, the response not only contains a
+list of places that match the search, but also the travel duration and distance
+from the routing origin to each place.
+
+In the following image, points A, B, and C are places returned in the search
+response:
+![Points A, B, and C are places returned in the search response.](https://developers.google.com/static/maps/documentation/places/images/calcTravelTime.svg)
+
+For each place in the results, the response contains the travel duration and
+distance from the routing origin to the place, if available.
+
+> [!NOTE]
+> **Note:** This is only an estimate of the routing information. To get the actual route details, including step-by-step directions, use the [Routes
+> API](https://developers.google.com/maps/documentation/routes/compute_route_directions).
+
+By default, the travel duration and distance is calculated using the [`TRAFFIC_UNAWARE`](https://developers.google.com/maps/documentation/routes/config_trade_offs#traffic_unaware)
+option in the Routes API. You can optionally set routing preferences to take
+live traffic conditions [`TRAFFIC_AWARE_OPTIMAL`](https://developers.google.com/maps/documentation/routes/config_trade_offs#traffic_aware_optimal)
+or latency-reduced live traffic conditions [`TRAFFIC_AWARE`](https://developers.google.com/maps/documentation/routes/config_trade_offs#traffic_aware)
+into consideration during calculations.
+
+> [!NOTE]
+> **Note:** `TRAFFIC_AWARE` and `TRAFFIC_OPTIMAL` only apply to the `DRIVE` and `TWO_WHEELER` travel modes. If either routing preference is specified with an unsupported travel mode, the routing summary calculation defaults to using the `TRAFFIC_UNAWARE` option. If `TWO_WHEELER` is specified in an [unsupported region](https://developers.google.com/maps/documentation/routes/coverage-two-wheeled), the API returns an empty routing summary.
+
+> [!CAUTION]
+> When you set the [`TRAFFIC_AWARE`](https://developers.google.com/maps/documentation/routes/config_trade_offs#traffic_aware) routing preference, routes are calculated accounting for traffic conditions. As a result, the route and route details more accurately reflect real-world conditions. Since this increase in data quality comes at the expense of response latency, performance optimizations are applied to reduce much of the latency. When you set the [`TRAFFIC_AWARE_OPTIMAL`](https://developers.google.com/maps/documentation/routes/config_trade_offs#traffic_aware_optimal) routing preference, routes are calculated accounting for traffic conditions, but no performance optimizations are applied. In this mode, the server performs a more exhaustive search of the road network to find the optimal route.
+
+### About routes, legs, and waypoints
+
+Several components make up a route, as calculated by the Routes API:
+![The components that make up a route.](https://developers.google.com/static/maps/documentation/places/images/route-leg-places.svg)
+
+A route consists of the following components:
+
+- **Waypoint** : To calculate a route, you specify at a minimum the locations of the origin and destination. You define these locations as *waypoints* on the route. *Intermediate waypoints* are locations in between the origin and destination that you want the route to go through.
+- **Route** : The entire trip from the origin waypoint, through any
+  intermediate waypoints, to the destination waypoint. A route consists of one
+  or more **legs**.
+
+  When passing a route to Text Search, you pass the [route's encoded
+  polyline](https://developers.google.com/maps/documentation/routes/traffic_on_polylines) as returned by the [Routes API](https://developers.google.com/maps/documentation/routes). An encoded
+  polyline is an encoded list of latitude and longitude points that lets you represent the
+  route's polyline as a string.
+- **Leg** : The path from one waypoint in a route to the next waypoint in the
+  route. Each leg consists of one or more discrete **steps**.
+
+  A route contains a separate leg for the path from each waypoint to the next.
+  For example, if the route contains a single origin waypoint and a single
+  destination waypoint, then the route contains a single leg.
+
+  For each additional waypoint you add to the route after the origin and
+  destination, called an *intermediate* waypoint, the API adds a separate leg.
+
+For more information on routes and calculating routes, see the [Routes
+API](https://developers.google.com/maps/documentation/routes).
+
+## Calculate the routing summary with a search along route
+
+You can combine **routing summary** calculations with **search along a route** .
+In this case, [Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) returns the travel duration and
+distance to each place in the response, and then from each place to the final
+destination of the route. Think of this calculation as providing a travel
+duration and distance if you detour from the specified route to travel to a
+place in the search results, and then continue on to the final destination.
+
+For example, consider the following route from the origin to the destination as
+calculated by the Routes API. Pass this route to the Text Search (New) API along
+with your search criteria.
+![Route from the origin waypoint to the destination with detour to search
+result.](https://developers.google.com/static/maps/documentation/places/images/travelTimeSearchAlongRoute.svg)
+
+In this example, location A is a place returned in the search results from
+Text Search (New). For each place in the response, the search includes the duration
+and distance required to detour to that place as a **two-leg trip**:
+
+- The first leg contains the travel duration and distance from the route **origin** to the **place**. In this example, from the origin to place A.
+- The second leg contains the travel duration and distance from the **place** to the route **destination**. In this example, from A to the destination.
+
+From the information in the response, you can then calculate the **detour
+duration and distance**, where:
+
+- \\(t_{OD}\\) is the **trip duration** from the origin to the destination, \\(s_{OD}\\) is the **trip distance** from the origin to the destination
+- \\(t_{OA}\\) is the **trip duration** from the origin to A; \\(s_{OA}\\) is the **trip distance** from the origin to A
+- \\(t_{AD}\\) is the **trip duration** from A to the destination; \\(s_{AD}\\) is the **trip distance** from A to the destination
+
+**Detour duration** is the **duration difference** between the **original trip**
+(from the origin to the destination) and the **new trip** (from the origin to
+the destination **through** A):
+$$ t_{detour} = t_{OA} + t_{AD} - t_{OD} $$
+
+**Detour distance** is the **distance difference** between the **original trip**
+(from the origin to the destination) and the **new trip** (from the origin to
+the destination **through** A):
+$$ s_{detour} = s_{OA} + s_{AD} - s_{OD} $$
+
+# Search along route
+
+To use [Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) to search along a route, pass the precalculated route
+from the [Routes API](https://developers.google.com/maps/documentation/routes/compute_route_directions) in
+the request as a polyline. The response contains places that match the search
+criteria and are also located near the specified route.
+
+To search along a route:
+
+1. Use the Routes API to calculate a route that [returns a route's encoded
+   polyline](https://developers.google.com/maps/documentation/routes/traffic_on_polylines) in the response.
+
+   > [!NOTE]
+   > **Note:** You can also encode your own polyline as described in [Encoded
+   > Polyline Algorithm Format](https://developers.google.com/maps/documentation/utilities/polylinealgorithm).
+
+2. Use the `searchAlongRouteParameters.polyline.encodedPolyline` parameter to
+   pass the route's encoded polyline to Text Search (New) to bias the search
+   results to the route. The response then contains places that match the
+   search criteria and are also located near the specified route.
+
+The APIs Explorer lets you make live requests so that you can get familiar with
+the API and the API options:
+[Try it!](https://developers.google.com/maps/documentation/places/web-service/search-along-route#try_it)
+
+By default, Text Search (New) performs the search along the entire route from
+the origin to the destination as defined by the polyline. In the following
+example, the polyline defines the route from:
+
+- **Origin**: 1600 Amphitheatre Parkway, Mountain View, CA
+- **Destination**: 24 Willie Mays Plaza, San Francisco, CA
+
+The trip's encoded polyline for this route is represented by the string:
+
+```yaml
+wblcFptchVIFOd@G@EVw@Ms@dHKR}ApNA`AF~@Hf@TjAb@bBb@~@n@p@^Rd@~@Vz@HVz@nDLt@?d@Kr@c@~@mD`G?`@aEfGkCnDuChDm`@bb@[`@{GhHeEdEciBnnBkC`DkC~DaClEuKjT_Z|l@Qb@iR~_@}EzJ_AdB_Und@kAfCaOjZkg@vcAqBzD_]rr@iBlEaBxEgArD}AlG}AhHsA`IeAnH{@dIq@dJgL~iBq@rHu@vGgAtHwArHaBhHkBzG_DpJ}Nbc@iBhGkA|EgC|LcIjb@oAhG_AvDgAdDkApC_BzCiBpCsFvGii@vn@scAxlAmLjNgSzUeRjT{TzWqExEmG|FuNlMmMhLaRvPqOlNmbAl}@mFlF{PlOmJfIoElE}LtMiSbU_H`I}}@jcAwl@vp@oAbBqA~BeAhCm@tBg@fCWrBQ~BI|DaB~rBO~D[bEa@`Dm@pDaAdE{@vC_BbEkB~Def@|z@sEzHKJeS~]}K`S{\\~l@cXpe@sBpDm@bAuCxDkBrBiC~BwCtByBnAcBx@}Bt@{Bn@gh@|LaOpDeFhAoDj@aE^kVrA_E^iEr@yD~@uBr@gMjF_EnAcCh@eFr@_DRsAD}@Jsu@xCWDqIV}BCeCOyDm@cBa@_DmA}JeE_CwAsBcBiBoBuAqBmOoX{CuEkB_CoDqDkVoUoD{CeE_DkEkC_FeCqB}@sDuAoDgAeCe@cCW}CK}BDaDTeOlBcuBrYaNlBq@Dyd@rGyFt@yBb@eBf@oCnAoBlAkIpGkAp@wBbAaCt@oFdAwKjBoGxA{FbByIjC_HfB_@KmNdDuC|@uFzBcH|C{@\\[?sBv@}@VaBVoA@y@EmAQcA[w@]aBkAeAkA}BuDUKs@uAqBsCwBcCgAiAiN_MyKsJsG{GkBaBiBuA{BwAwDkBcOaHiC_AiCg@}BQcCAcBHqBVkB`@qEjAu@LgCVgAHwG@sG?mABsH^eNr@mBXy@NqBt@uAt@aBlAkAlA}BtCyApBiAdB_BxB{A`B}@j@oAf@s@PeCVcIf@gAAkAQy@YiAo@_A{@_DgEgJqM_DeEaM}PoBiCzAsBw@kAdAGVk@f@q@z@C
+```
+
+> [!NOTE]
+> **Note:** Search along route only supports an encoded polyline, which can be passed as a string and includes compression with minimal lossiness. This is the Routes API default output. For more information, see [Request route
+> polylines](https://developers.google.com/maps/documentation/routes/traffic_on_polylines).
+
+The following example uses the route's encoded polyline to bias the search
+results:
+
+```
+  curl -X POST -d '{
+    "textQuery" : "Spicy Vegetarian Food",
+    "searchAlongRouteParameters": {
+      "polyline": {
+        "encodedPolyline": "ROUTE_POLYLINE"
+      }
+    }
+  }' \
+  -H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+  -H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel' \
+  'https://places.googleapis.com/v1/places:searchText'
+```
+
+The response contains the places that match the search criteria, biased to the
+route:
+
+```yaml
+  {
+    "places": [
+      {
+        "formattedAddress": "60 Morris St, San Francisco, CA 94107, USA",
+        "priceLevel": "PRICE_LEVEL_MODERATE",
+        "displayName": {
+          "text": "Umami Express",
+          "languageCode": "en"
+        }
+      },
+      {
+        "formattedAddress": "1130 4th St, San Francisco, CA 94158, USA",
+        "priceLevel": "PRICE_LEVEL_MODERATE",
+        "displayName": {
+          "text": "House of Tadu Ethiopian Kitchen",
+          "languageCode": "en"
+        }
+      },
+      {
+        "formattedAddress": "1602 El Camino Real Ste A, Belmont, CA 94002, USA",
+        "priceLevel": "PRICE_LEVEL_MODERATE",
+        "displayName": {
+          "text": "Eats Meets West Bowls",
+          "languageCode": "en"
+        }
+      },
+      /.../
+    ]
+  }
+```
+
+You don't have to bias the results to the entire route. For example, you might
+already be halfway along the route before you perform the search. In this case,
+you can specify an explicit routing origin to the search to override the origin
+defined in the encoded polyline. In the following example, you specify the
+latitude and longitude coordinates of San Mateo, CA, which is approximately
+halfway along the route polyline:
+
+```
+  curl -X POST -d '{
+    "textQuery" : "Spicy Vegetarian Food",
+    "searchAlongRouteParameters": {
+      "polyline": {
+        "encodedPolyline": "ROUTE_POLYLINE"
+      }
+    },
+    "routingParameters": {
+      "origin": {
+        "latitude": 37.56617,
+        "longitude": -122.30870
+      }
+    }
+  }' \
+  -H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+  -H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel' \
+  'https://places.googleapis.com/v1/places:searchText'
+```
+
+> [!NOTE]
+> **Note:** Because search along route returns places with minimal detour times from origin to destination, in cases where the route origin and destination are the same or close to one another, search along route may not return any results.
+
+## Try it!
+
+The APIs Explorer lets you make sample requests so
+that you can get familiar with the API and the API options.
+
+1. Select the API icon api
+   on the right side of the page.
+
+2. Optionally edit the request parameters.
+
+3. Select the **Execute** button. In the dialog, choose the account
+   that you want to use to make the request.
+
+4. In the APIs Explorer panel, select the fullscreen icon
+   fullscreen to expand the APIs Explorer window.
+
+   # Calculate routing summary
+
+To use [Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) or [Nearby Search (New)](https://developers.google.com/maps/documentation/places/web-service/nearby-search)
+to calculate the travel duration and distance to each place in the response:
+
+1. Pass the `routingParameters.origin` parameter in the request to specify the
+   latitude and longitude coordinates of the routing origin. This parameter is
+   required to calculate the duration and distance to each place in the
+   response.
+
+2. Include `routingSummaries` in the field mask so that the response includes
+   the `routingSummaries` array. This array contains the duration and distance
+   from the routing origin to each place in the response.
+
+   > [!NOTE]
+   > **Note:** Adding `routingSummaries` in the field mask without also including either the `routingParameters.origin` parameter or the `searchAlongRouteParameters.polyline.encodedPolyline` parameter in the request causes an error.
+
+The APIs Explorer lets you make live requests so that you can get familiar with
+the API and the API options:
+[Try it!](https://developers.google.com/maps/documentation/places/web-service/routing-summary#try_it)
+
+## Use Text Search (New)
+
+In the following request, you calculate the travel duration and distance to each
+place in the Text Search (New) response:
+
+```
+curl -X POST -d '{
+  "textQuery" : "Spicy Vegetarian Food in Sydney, Australia",
+  "routingParameters": {
+    "origin": {
+      "latitude": -33.8688,
+      "longitude": 151.1957362
+    }
+  }
+}' \
+-H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+-H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel,routingSummaries' \
+'https://places.googleapis.com/v1/places:searchText'
+```
+
+The response contains two JSON arrays: the `places` array contains the matching
+places, and the `routingSummaries` array containing the duration and distance to
+travel to each place:
+
+```yaml
+{
+  "places": [
+    {
+      object (https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/places)
+    }
+  ]
+  "routingSummaries": [
+    {
+      object (https://developers.google.com/maps/documentation/places/web-service/reference/rest/v1/RoutingSummary)
+    }
+}
+```
+
+Each element in the `routingSummaries` array is at the corresponding array
+location as the place in the `places` array. That is, the element at
+`routingSummaries[0]` corresponds to the place at `places[0]`.
+
+The array length of `routingSummaries` is the same as the array length of
+`places`. In the case where the `routingSummary` for a place is not available,
+the array entry is empty.
+
+Because this example calculates the duration and distance from the routing
+origin to each place, the `routingSummaries.legs` field in the response contains a single
+`Leg` object that contains the `duration` and `distanceMeters` from
+the routing origin to the place.
+
+> [!NOTE]
+> **Note:** This response also includes the Preview (pre-GA) `directionsUri` field in the routing summary for each place. This field contains a link to open directions to the place in Google Maps. The `routingParameters.origin` parameter is used as the directions origin, the place location is used as the destination, and the travel mode defaults to drive.
+
+> [!WARNING]
+> This product or feature is in Preview (pre-GA). Pre-GA products and features might have limited support, and changes to pre-GA products and features might not be compatible with other pre-GA versions. Pre-GA Offerings are covered by the [Google
+> Maps Platform Service Specific Terms](https://cloud.google.com/maps-platform/terms/maps-service-terms). For more information, see the [launch stage
+> descriptions](https://developers.google.com/maps/launch-stages).
+
+```json
+{
+  "places": [
+    {
+      "formattedAddress": "1, Westfield Sydney Central Plaza, 450 George St, Sydney NSW 2000, Australia",
+      "displayName": {
+        "text": "Gözleme King Sydney",
+        "languageCode": "en"
+      }
+    },
+    {
+      "formattedAddress": "367 Pitt St, Sydney NSW 2000, Australia",
+      "priceLevel": "PRICE_LEVEL_MODERATE",
+      "displayName": {
+        "text": "Mother Chu's Vegetarian Kitchen",
+        "languageCode": "en"
+      }
+    },
+    ...
+  ]
+  "routingSummaries": [
+    {
+      "legs": [
+        {
+          "duration": "597s",
+          "distanceMeters": 2607
+        }
+      ],
+      "directionsUri": "https://www.google.com/maps/dir/-33.8688,151.1957362/''/data=!4m6!4m5!1m0!1m2!1m1!1s0x6b12ae3fa97cd745:0x6aecf365bf497c08!3e0"
+    },
+    {
+      "legs": [
+        {
+          "duration": "562s",
+          "distanceMeters": 2345
+        }
+      ],
+      "directionsUri": "https://www.google.com/maps/dir/-33.8688,151.1957362/''/data=!4m6!4m5!1m0!1m2!1m1!1s0x6b12ae3da97f60c1:0x845f3273bd764f6c!3e0"
+    },
+   ...
+  ]
+}
+```
+
+From this example, you can see that the duration and distance from the routing
+origin to the first place in the results is 597 seconds and 2607 meters.
+
+## Use Nearby Search
+
+In this example, you calculate the travel duration and distance to each place in
+the Nearby Search response. This example searches for restaurants in Sydney,
+Australia and sets the location restriction and the routing origin to the same
+latitude and longitude coordinate:
+
+```
+  curl -X POST -d '{
+    "includedTypes": ["restaurant"],
+    "maxResultCount": 10,
+    "locationRestriction": {
+      "circle": {
+        "center": {
+          "latitude": -33.8688,
+          "longitude": 151.1957362},
+        "radius": 500.0
+      }
+    },
+    "routingParameters": {
+      "origin": {
+        "latitude": -33.8688,
+        "longitude": 151.1957362
+      }
+    }
+  }' \
+  -H 'Content-Type: application/json' -H "X-Goog-Api-Key:API_KEY" \
+  -H "X-Goog-FieldMask: places.displayName,routingSummaries" \
+  https://places.googleapis.com/v1/places:searchNearby
+```
+
+You don't have to use the same coordinates for the `locationRestriction` and the
+for routing origin. For example, you set the `locationRestriction` to the center
+point of Sydney to bias the search results to that circle. But you then set the
+routing origin to the coordinates of your house, meaning to a different location
+within the search circle. The request then biases the search results to the
+circle, and calculates the routing summaries based on the location of your
+house.
+
+## Specify travel options
+
+By default, the duration and distance calculations are for a car. However, you
+can control the vehicle type, as well as other options, in the search.
+
+- Use the `routingParameters.travelMode` parameter to set the mode of
+  transportation to `DRIVE`, `BICYCLE`, `WALK`, or `TWO_WHEELER`. For more
+  information on these options, see [Available vehicle types for
+  routes](https://developers.google.com/maps/documentation/routes/vehicles).
+
+  > [!NOTE]
+  > **Note:** The Routes API also supports a mode of `TRANSIT`, but that mode is not supported by the Places API.
+
+  > [!NOTE]
+  > **Note:** The `TWO_WHEELER` option is only supported in those countries listed at [Countries and regions supported for two-wheeled
+  > vehicles](https://developers.google.com/maps/documentation/routes/coverage-two-wheeled).
+
+- Use the `routingParameters.routingPreference` property to set the routing preference option to `TRAFFIC_UNAWARE` (default), `TRAFFIC_AWARE`, or `TRAFFIC_AWARE_OPTIMAL`. Each option has varying levels of data quality and latency. For more information, see [Specify how and if to include traffic
+  data](https://developers.google.com/maps/documentation/routes/config_trade_offs).
+
+  The `routingParameters.routingPreference` property does affect the
+  directions contained in the Preview (Pre-GA) `directionsUri` field because
+  Google Maps displays traffic options when it opens the link.
+- Use the `routingParameters.routeModifiers` property to specify to `avoidTolls`, `avoidHighways`, `avoidFerries`, and `avoidIndoor`. For more information on these options, see [Specify route features to
+  avoid](https://developers.google.com/maps/documentation/routes/route-modifiers).
+
+In the next example, you specify the travel mode as `DRIVE` and to avoid
+highways:
+
+```
+curl -X POST -d '{
+  "textQuery" : "Spicy Vegetarian Food in Sydney, Australia",
+  "routingParameters": {
+    "origin": {
+      "latitude": -33.8688,
+      "longitude": 151.1957362
+    },
+    "travelMode":"DRIVE",
+    "routeModifiers": {
+      "avoidHighways": true
+    }
+  }
+}' \
+-H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+-H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel,routingSummaries' \
+'https://places.googleapis.com/v1/places:searchText'
+```
+
+## Try it!
+
+The APIs Explorer lets you make sample requests so
+that you can get familiar with the API and the API options.
+
+1. Select the API icon api
+   on the right side of the page.
+
+2. Optionally edit the request parameters.
+
+3. Select the **Execute** button. In the dialog, choose the account
+   that you want to use to make the request.
+
+4. In the APIs Explorer panel, select the fullscreen icon
+   fullscreen to expand the APIs Explorer window.
+
+# Combine routing summaries with search along route
+
+You can combine **routing summary** calculations with **search along a route** .
+In this case, [Text Search (New)](https://developers.google.com/maps/documentation/places/web-service/text-search) returns the travel duration and distance to each
+place in the response, and then from each place to the final destination of the
+route.
+
+To use Text Search (New) to calculate the routing summary along with search
+along a route:
+
+1. Use the Routes API to calculate a route that [returns a route polyline](https://developers.google.com/maps/documentation/routes/traffic_on_polylines)
+   in the response.
+
+2. Use the `searchAlongRouteParameters.polyline.encodedPolyline` parameter to
+   pass the route polyline to Text Search (New) to bias the search results to
+   the route. The response then contains places that match the search criteria
+   and are also located near the specified route.
+
+3. Include `routingSummaries` in the field mask so that the response includes
+   the `routingSummaries` array. This array contains the duration and distance
+   from the routing origin to each place in the response.
+
+   > [!NOTE]
+   > **Note:** Adding `routingSummaries` in the field mask without also including either the `routingParameters.origin` parameter or the `searchAlongRouteParameters.polyline.encodedPolyline` parameter in the request causes an error.
+
+The APIs Explorer lets you make live requests so that you can get familiar with
+the API and the API options:
+[Try it!](https://developers.google.com/maps/documentation/places/web-service/routing-summary-sar#try_it)
+
+By default, Text Search (New) performs the search along the entire route:
+
+```
+curl -X POST -d '{
+  "textQuery" : "Spicy Vegetarian Food",
+  "searchAlongRouteParameters": {
+    "polyline": {
+      "encodedPolyline": "ROUTE_POLYLINE"
+    }
+  }
+}' \
+-H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+-H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel,routingSummaries' \
+'https://places.googleapis.com/v1/places:searchText'
+```
+
+The response contains two arrays: the `places` array containing the matching
+places, and the `routingSummaries` array containing the duration and distance to
+travel to each place:
+
+```json
+{
+  "places": [
+    {
+      "formattedAddress": "1199 El Camino Real, San Bruno, CA 94066, USA",
+      "priceLevel": "PRICE_LEVEL_INEXPENSIVE",
+      "displayName": {
+        "text": "Vegan Mob - Vegan BBQ and Soul Food",
+        "languageCode": "en"
+      }
+    },
+    {
+      "formattedAddress": "839 Kearny St, San Francisco, CA 94108, USA",
+      "priceLevel": "PRICE_LEVEL_MODERATE",
+      "displayName": {
+        "text": "Enjoy Vegetarian",
+        "languageCode": "en"
+      }
+    },
+   ...
+],
+  "routingSummaries": [
+    {
+      "legs": [
+        {
+          "duration": "285s",
+          "distanceMeters": 1616
+        },
+        {
+          "duration": "2466s",
+          "distanceMeters": 58147
+        }
+      ],
+      "directionsUri": "https://www.google.com/maps/dir/37.42268,-122.08473/''/37.77877,-122.38781/data=!4m7!4m6!1m0!1m2!1m1!1s0x808f87f9ede375f5:0xa37171fea1a16b28!1m0!3e0"
+    },
+    {
+      "legs": [
+        {
+          "duration": "696s",
+          "distanceMeters": 4704
+        },
+        {
+          "duration": "2787s",
+          "distanceMeters": 58901
+        }
+      ],
+      "directionsUri": "https://www.google.com/maps/dir/37.42268,-122.08473/''/37.77877,-122.38781/data=!4m7!4m6!1m0!1m2!1m1!1s0x808580f4cebdb06f:0xd3af09e5742234f2!1m0!3e0"
+    },
+   ...
+  ]
+}
+```
+
+For each entry in the `legs` array, Text Search (New) returns a **two-leg** trip
+time:
+
+- The first leg contains the travel duration and distance from the origin to
+  the place. In this example, the duration and distance from the origin to the
+  first place in the results is 285 seconds and 1616 meters.
+
+- The second leg contains the travel duration and distance from the place to
+  the route destination. In this example, the duration and distance is
+  2466 seconds and 58147 meters.
+
+> [!NOTE]
+> **Note:** This response also includes the Preview (pre-GA) `directionsUri` field in the routing summary for each place. This field contains a link to open directions to the place in Google Maps. The polyline origin or the `routingParameters.origin` parameter specifies directions origin, the polyline destination specifies the directions destination, and the travel mode is drive. The directions start at the origin, proceed to the place as a waypoint, and end at the route destination.
+
+> [!WARNING]
+> This product or feature is in Preview (pre-GA). Pre-GA products and features might have limited support, and changes to pre-GA products and features might not be compatible with other pre-GA versions. Pre-GA Offerings are covered by the [Google
+> Maps Platform Service Specific Terms](https://cloud.google.com/maps-platform/terms/maps-service-terms). For more information, see the [launch stage
+> descriptions](https://developers.google.com/maps/launch-stages).
+
+## Specify the routing origin, travel mode, and route modifiers
+
+You can modify the search and routing summary calculation by specifying the
+routing origin, travel mode, route modifiers, and routing preferences. The
+travel mode and route modifiers work the same as for calculating routing
+summaries without specifying a route as shown in the [Specify travel
+options](https://developers.google.com/maps/documentation/places/web-service/routing-summary#travel-options) topic.
+
+By default, the first leg of each result contains the distance from the origin
+defined by the polyline to each place. However, you can override that default by
+explicitly specifying a routing origin in the request. If specified, the first
+leg of all responses specifies the distances and duration from the specified
+routing origin, overriding the origin from the polyline.
+
+In the next example, you specify a routing origin as the coordinates of San
+Mateo, CA, specify to avoid tolls, and set the number of results to 5:
+
+```
+  curl -X POST -d '{
+    "textQuery" : "Spicy Vegetarian Food",
+    "maxResultCount": 5,
+    "searchAlongRouteParameters": {
+      "polyline": {
+        "encodedPolyline": "ROUTE_POLYLINE"
+      }
+    },
+    "routingParameters": {
+      "origin": {
+        "latitude": 37.56617,
+        "longitude": -122.30870
+      },
+      "travelMode":"DRIVE",
+      "routeModifiers": {
+        "avoidTolls": true
+      }
+    }
+  }' \
+  -H 'Content-Type: application/json' -H 'X-Goog-Api-Key: API_KEY' \
+  -H 'X-Goog-FieldMask: places.displayName,places.formattedAddress,places.priceLevel,routingSummaries' \
+  'https://places.googleapis.com/v1/places:searchText'
+```
+
+The following image shows a map that contains the route polyline, the new origin
+(light-blue pin), and the places in the search results (green pins). Notice how
+all the results are along the route, but past San Mateo:
+![Search results from the update origin.](https://developers.google.com/static/maps/documentation/places/images/sar-origin.png)
+
+## Try it!
+
+The APIs Explorer lets you make sample requests so
+that you can get familiar with the API and the API options.
+
+1. Select the API icon api
+   on the right side of the page.
+
+2. Optionally edit the request parameters.
+
+3. Select the **Execute** button. In the dialog, choose the account
+   that you want to use to make the request.
+
+4. In the APIs Explorer panel, select the fullscreen icon
+   fullscreen to expand the APIs Explorer window.
+
+   
