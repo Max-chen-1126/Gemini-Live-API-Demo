@@ -184,6 +184,40 @@ video {
   font-size: 24px;
 }
 
+/* Map Container */
+.map-container {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  height: 35vh;
+  z-index: 500;
+  background: #1a1a1a;
+  transition: height 0.3s ease;
+}
+
+.map-container.collapsed {
+  height: 0;
+  overflow: hidden;
+}
+
+.map-toggle-button {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 600;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .hidden {
   display: none !important;
 }

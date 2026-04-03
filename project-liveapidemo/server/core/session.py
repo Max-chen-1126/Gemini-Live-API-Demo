@@ -31,6 +31,7 @@ class SessionState:
     received_model_response: bool = (
         False  # Track if we've received a model response in current turn
     )
+    last_route_polyline: Optional[str] = None  # Cache last route polyline for place search
 
 
 # Global session storage

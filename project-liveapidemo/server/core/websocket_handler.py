@@ -23,8 +23,12 @@ import logging
 import traceback
 from typing import Any, Optional
 
+from google.genai import types
+
+from config.config import api_config
 from core.gemini_client import create_gemini_session
 from core.session import SessionState, create_session, remove_session
+from tools.tool_registry import execute_tool
 
 logger = logging.getLogger(__name__)
 
@@ -143,21 +147,32 @@ async def handle_client_messages(websocket: Any, session: SessionState) -> None:
                 if "type" in data:
                     if data["type"] == "audio":
                         logger.debug("Sending audio to Gemini...")
-                        await session.genai_session.send(
-                            input={"data": data.get("data"), "mime_type": "audio/pcm"},
-                            end_of_turn=True,
+                        audio_bytes = base64.b64decode(data.get("data"))
+                        await session.genai_session.send_realtime_input(
+                            audio=types.Blob(
+                                data=audio_bytes,
+                                mime_type="audio/pcm;rate=16000",
+                            )
                         )
                         logger.debug("Audio sent to Gemini")
                     elif data["type"] == "image":
                         logger.info("Sending image to Gemini...")
-                        await session.genai_session.send(
-                            input={"data": data.get("data"), "mime_type": "image/jpeg"}
+                        image_bytes = base64.b64decode(data.get("data"))
+                        await session.genai_session.send_realtime_input(
+                            media=types.Blob(
+                                data=image_bytes,
+                                mime_type="image/jpeg",
+                            )
                         )
                         logger.info("Image sent to Gemini")
                     elif data["type"] == "text":
                         logger.info("Sending text to Gemini...")
-                        await session.genai_session.send(
-                            input=data.get("data"), end_of_turn=True
+                        await session.genai_session.send_client_content(
+                            turns=types.Content(
+                                parts=[types.Part(text=data.get("data"))],
+                                role="user",
+                            ),
+                            turn_complete=True,
                         )
                         logger.info("Text sent to Gemini")
                     elif data["type"] == "end":
@@ -195,31 +210,26 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
                         )
                     logger.debug(f"Received response from Gemini: {debug_response}")
 
-                    # Log what attributes are available in server_content for debugging
-                    server_content_attrs = [
-                        attr
-                        for attr in dir(response.server_content)
-                        if not attr.startswith("_")
-                    ]
-                    logger.debug(f"Server content attributes: {server_content_attrs}")
+                    # Handle function calling (tool_call) - Gemini 3.1 blocking mode
+                    if hasattr(response, "tool_call") and response.tool_call:
+                        await handle_tool_calls(websocket, session, response.tool_call)
+                        continue
 
-                    # Check for transcription attributes specifically
-                    has_input_transcription = (
-                        hasattr(response.server_content, "input_transcription")
-                        and response.server_content.input_transcription
-                    )
-                    has_output_transcription = (
-                        hasattr(response.server_content, "output_transcription")
-                        and response.server_content.output_transcription
-                    )
-                    logger.debug(
-                        f"Has input_transcription: {has_input_transcription}, Has output_transcription: {has_output_transcription}"
-                    )
+                    # Handle server content (audio, text, transcriptions, etc.)
+                    if response.server_content:
+                        # Log what attributes are available for debugging
+                        server_content_attrs = [
+                            attr
+                            for attr in dir(response.server_content)
+                            if not attr.startswith("_")
+                        ]
+                        logger.debug(
+                            f"Server content attributes: {server_content_attrs}"
+                        )
 
-                    # Process server content (including audio) immediately
-                    await process_server_content(
-                        websocket, session, response.server_content
-                    )
+                        await process_server_content(
+                            websocket, session, response.server_content
+                        )
 
                 except Exception as e:
                     logger.error(f"Error handling Gemini response: {e}")
@@ -227,6 +237,69 @@ async def handle_gemini_responses(websocket: Any, session: SessionState) -> None
     except Exception as e:
         logger.error(f"Error in handle_gemini_responses: {e}")
         raise
+
+
+async def handle_tool_calls(websocket: Any, session: SessionState, tool_call: Any) -> None:
+    """Handle function calls from Gemini and return results.
+
+    Gemini 3.1 uses blocking function calling - the model waits for results
+    before continuing to generate a response.
+    """
+    call_results = []
+
+    # Execute each function call and notify the client
+    for fc in tool_call.function_calls:
+        fc_id = getattr(fc, "id", None)
+        logger.info(f"Function call received: {fc.name} (id={fc_id}) with args: {dict(fc.args)}")
+
+        # Notify client that a function is being called
+        await websocket.send(
+            json.dumps(
+                {
+                    "type": "function_call",
+                    "data": {"name": fc.name, "args": dict(fc.args)},
+                }
+            )
+        )
+
+        # For search_places_along_route, use cached polyline instead of Gemini-provided one
+        # (Gemini may truncate or corrupt the polyline during relay)
+        args = dict(fc.args)
+        if fc.name == "search_places_along_route" and session.last_route_polyline:
+            args["route_polyline"] = session.last_route_polyline
+            logger.info("Using cached route polyline instead of Gemini-provided one")
+
+        # Execute the tool
+        result = await execute_tool(fc.name, args)
+
+        # Cache route polyline for subsequent search_places_along_route calls
+        if fc.name == "compute_route" and result.get("encoded_polyline"):
+            session.last_route_polyline = result["encoded_polyline"]
+
+        # Notify client of the result (includes map data for frontend rendering)
+        await websocket.send(
+            json.dumps(
+                {
+                    "type": "function_response",
+                    "data": {"name": fc.name, "result": result},
+                }
+            )
+        )
+
+        # Build FunctionResponse with id from the original FunctionCall
+        call_results.append(
+            types.FunctionResponse(
+                id=fc_id,
+                name=fc.name,
+                response={"result": result},
+            )
+        )
+
+    # Send all function responses back to Gemini
+    logger.info(f"Sending {len(call_results)} function responses back to Gemini")
+    await session.genai_session.send_tool_response(
+        function_responses=call_results
+    )
 
 
 async def process_server_content(
@@ -351,8 +424,11 @@ async def handle_client(websocket: Any) -> None:
         async with await create_gemini_session() as gemini_session:
             session.genai_session = gemini_session
 
-            # Send ready message to client
-            await websocket.send(json.dumps({"ready": True}))
+            # Send ready message to client (include Maps JS API key for dynamic loading)
+            ready_msg = {"ready": True}
+            if api_config.maps_js_api_key:
+                ready_msg["maps_js_api_key"] = api_config.maps_js_api_key
+            await websocket.send(json.dumps(ready_msg))
             logger.info(f"New session started: {session_id}")
 
             try:

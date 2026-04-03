@@ -55,6 +55,41 @@ body {
   .hidden {
     display: none;
   }
+
+  /* Map Container */
+  .map-container {
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+    margin: 10px auto;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ddd;
+    transition: height 0.3s ease;
+  }
+
+  .map-container.collapsed {
+    height: 0;
+    border: none;
+    margin: 0 auto;
+  }
+
+  .map-toggle-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 600;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
   #output {
     margin: 20px;

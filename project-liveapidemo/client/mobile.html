@@ -26,7 +26,15 @@
 </head>
 <body>
   <div class="header-section">
-    <h1>Live API Demo &#127837;</h1>
+    <h1>AI Travel Assistant</h1>
+  </div>
+
+  <!-- Map Container -->
+  <div id="mapContainer" class="map-container hidden">
+    <div id="map" style="width: 100%; height: 100%;"></div>
+    <button id="mapToggleButton" class="map-toggle-button">
+      <span class="material-symbols-outlined">map</span>
+    </button>
   </div>
 
   <div id="functionInfo" class="function-info">
@@ -67,12 +75,31 @@
   <!-- Load EventEmitter3 first -->
   <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
 
+  <script>
+    // Google Maps API will be loaded dynamically after receiving the API key from server
+    window.mapReady = false;
+    window.initMap = function() {
+      window.mapReady = true;
+      console.log('Google Maps API loaded');
+    };
+    window.loadGoogleMapsAPI = function(apiKey) {
+      if (window.mapReady || document.getElementById('google-maps-script')) return;
+      const script = document.createElement('script');
+      script.id = 'google-maps-script';
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,marker&callback=initMap`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    };
+  </script>
+
   <script type="module">
     import { AudioRecorder } from './src/audio/audio-recorder.js';
     import { AudioStreamer } from './src/audio/audio-streamer.js';
     import { MediaHandler } from './src/media/media-handler.js';
     import { GeminiAPI } from './src/api/gemini-api.js';
     import { base64ToArrayBuffer } from './src/utils/utils.js';
+    import { MapHandler } from './src/map/map-handler.js';
 
     // Check if device is mobile first
     const urlParams = new URLSearchParams(window.location.search);
@@ -87,6 +114,22 @@
     const mediaHandler = new MediaHandler();
     const wsEndpoint = 'ws://localhost:8081';
     const api = new GeminiAPI(wsEndpoint);
+    const mapHandler = new MapHandler();
+
+    // Initialize map when Google Maps API is ready
+    function tryInitMap() {
+      if (window.mapReady) {
+        mapHandler.initialize('map', document.getElementById('mapContainer'));
+      } else {
+        setTimeout(tryInitMap, 200);
+      }
+    }
+    tryInitMap();
+
+    // Map toggle button
+    document.getElementById('mapToggleButton').addEventListener('click', () => {
+      mapHandler.toggle();
+    });
 
     let isStarted = false;
     let isRecording = false;
@@ -184,12 +227,16 @@
     };
 
     // Set up API handlers
-    api.onReady = () => {
+    api.onReady = (readyMsg) => {
       document.getElementById('connectButton').disabled = false;
       // Remove any existing connection error message
       const existingError = document.querySelector('.connection-error');
       if (existingError) {
         existingError.remove();
+      }
+      // Dynamically load Google Maps API with key from server
+      if (readyMsg && readyMsg.maps_js_api_key) {
+        window.loadGoogleMapsAPI(readyMsg.maps_js_api_key);
       }
     };
 
@@ -265,19 +312,38 @@
 
     api.onFunctionResponse = (data) => {
       const functionInfo = document.getElementById('functionInfo');
-      // Stringify the response data
-      let responseString = JSON.stringify(data, null, 2);
-      
-      // Use regex to find the line with "title": and wrap it in <strong> tags
-      // This assumes the title value is a simple string.
-      const titleRegex = /(^\s*"title":\s*".*?"(,?)\s*$)/gm;
-      responseString = responseString.replace(titleRegex, '<strong>$1</strong>');
+      const result = data.result || {};
 
-      // Append response with its own color, preserving previous content and adding pre tag
-      // Ensure the modified string is treated as HTML
-      const responseElement = document.createElement('pre');
-      responseElement.innerHTML = `<span class="function-response-display">Response:\n${responseString}</span>`;
-      functionInfo.appendChild(responseElement);
+      // Render map data based on function name
+      if (data.name === 'compute_route' && result.encoded_polyline) {
+        mapHandler.drawRoute(
+          result.encoded_polyline,
+          result.origin_latlng,
+          result.destination_latlng
+        );
+        // Show route summary in function info
+        const summaryEl = document.createElement('pre');
+        summaryEl.innerHTML = `<span class="function-response-display">Route: ${result.origin} → ${result.destination}\nDistance: ${result.distance_km} km | Duration: ${result.duration_minutes} min</span>`;
+        functionInfo.appendChild(summaryEl);
+      } else if (
+        (data.name === 'search_places_along_route' || data.name === 'search_nearby_places') &&
+        result.places && result.places.length > 0
+      ) {
+        mapHandler.addPlaceMarkers(result.places);
+        // Show places summary in function info
+        const placesEl = document.createElement('pre');
+        const placeNames = result.places.map(p => p.name).join(', ');
+        placesEl.innerHTML = `<span class="function-response-display">Found ${result.count} places: ${placeNames}</span>`;
+        functionInfo.appendChild(placesEl);
+      } else {
+        // Fallback: show raw response
+        let responseString = JSON.stringify(data, null, 2);
+        const titleRegex = /(^\s*"title":\s*".*?"(,?)\s*$)/gm;
+        responseString = responseString.replace(titleRegex, '<strong>$1</strong>');
+        const responseElement = document.createElement('pre');
+        responseElement.innerHTML = `<span class="function-response-display">Response:\n${responseString}</span>`;
+        functionInfo.appendChild(responseElement);
+      }
     };
 
     // Add tool use and result handlers

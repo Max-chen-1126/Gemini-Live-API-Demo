@@ -68,7 +68,7 @@ export class GeminiAPI {
 
                 if (response.ready) {
                     console.log('Received ready signal from server');
-                    this.onReady();
+                    this.onReady(response);
                     return;
                 }
 
