@@ -15,71 +15,134 @@
 -->
 
 <!DOCTYPE html>
-<html>
+<html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0f" />
     <title>AI Travel Assistant - Live API Demo</title>
     <link rel="stylesheet" href="styles/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
-
-    <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   </head>
   <body>
-    <div class="container">
-      <h1>AI Travel Assistant</h1>
-      <p>
-        使用方式 : 可以通過打字或對著麥克風說話，並可選擇分享網路攝影機或螢幕。
-      </p>
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="header-logo">
+          <span class="material-symbols-outlined">travel_explore</span>
+        </div>
+        <div>
+          <div class="header-title">AI Travel Assistant</div>
+          <div class="header-subtitle">Voice &amp; Text Multimodal Chat</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="connection-status">
+          <span class="status-dot" id="statusDot"></span>
+          <span id="statusText">Connecting...</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Side Panel Toggle (mobile) -->
+    <button class="side-panel-toggle" id="sidePanelToggle">
+      <span class="material-symbols-outlined">dock_to_left</span>
+    </button>
+
+    <!-- Main Layout -->
+    <div class="app-layout">
+      <!-- Chat Panel -->
+      <div class="chat-panel">
+        <div id="output"></div>
+      </div>
+
+      <!-- Side Panel -->
+      <aside class="side-panel" id="sidePanel">
+        <!-- Map Section -->
+        <div class="panel-section collapsed" id="mapSection">
+          <div class="panel-section-header" data-toggle="mapSection">
+            <span class="material-symbols-outlined">map</span>
+            Map
+            <span class="material-symbols-outlined expand-arrow">expand_more</span>
+          </div>
+          <div class="panel-section-content">
+            <div id="mapContainer" class="map-wrapper">
+              <div id="map" style="width: 100%; height: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Section -->
+        <div class="panel-section collapsed" id="videoSection">
+          <div class="panel-section-header" data-toggle="videoSection">
+            <span class="material-symbols-outlined">videocam</span>
+            Video Preview
+            <span class="material-symbols-outlined expand-arrow">expand_more</span>
+          </div>
+          <div class="panel-section-content">
+            <div class="video-wrapper" id="videoWrapper">
+              <video id="videoPreview" autoplay playsinline></video>
+            </div>
+          </div>
+        </div>
+
+        <!-- Function Info Section -->
+        <div class="panel-section collapsed" id="debugSection">
+          <div class="panel-section-header" data-toggle="debugSection">
+            <span class="material-symbols-outlined">terminal</span>
+            Debug Console
+            <span class="material-symbols-outlined expand-arrow">expand_more</span>
+          </div>
+          <div class="panel-section-content">
+            <div id="functionInfo"></div>
+          </div>
+        </div>
+      </aside>
     </div>
 
-    <!-- Map Container -->
-    <div id="mapContainer" class="map-container hidden">
-      <div id="map" style="width: 100%; height: 100%;"></div>
-      <button id="mapToggleButton" class="map-toggle-button">
-        <span class="material-symbols-outlined">map</span>
-      </button>
-    </div>
-
-    <div class="input-container">
-      <button id="micButton" disabled class="action-button">
-        <span class="material-symbols-outlined">mic</span>
-      </button>
-      <button id="webcamButton" class="action-button">
-        <span class="material-symbols-outlined">videocam</span>
-      </button>
-      <button id="screenButton" class="action-button">
-        <span class="material-symbols-outlined">present_to_all</span>
-      </button>
-      <div class="text-input-container">
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <div class="media-buttons">
+        <button id="micButton" disabled class="action-button" title="Microphone">
+          <span class="material-symbols-outlined">mic</span>
+        </button>
+        <button id="webcamButton" class="action-button" title="Webcam">
+          <span class="material-symbols-outlined">videocam</span>
+        </button>
+        <button id="screenButton" class="action-button" title="Screen Share">
+          <span class="material-symbols-outlined">present_to_all</span>
+        </button>
+      </div>
+      <div class="text-input-wrapper">
         <input
           type="text"
           id="textInput"
           placeholder="Type your message..."
           class="text-input"
         />
-        <button id="sendButton" class="action-button">
+        <button id="sendButton" class="send-button" title="Send">
           <span class="material-symbols-outlined">send</span>
         </button>
         <button
           id="interruptButton"
-          class="action-button"
+          class="interrupt-button"
           style="display: none"
+          title="Interrupt"
         >
-          <span class="material-symbols-outlined">cancel</span>
+          <span class="material-symbols-outlined">stop</span>
         </button>
       </div>
     </div>
-
-    <div class="video-container">
-      <video id="videoPreview" autoplay playsinline class="hidden"></video>
-    </div>
-
-    <div id="output"></div>
 
     <!-- Load EventEmitter3 first -->
     <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
@@ -87,14 +150,15 @@
     <script>
       // Google Maps API will be loaded dynamically after receiving the API key from server
       window.mapReady = false;
-      window.initMap = function() {
+      window.initMap = function () {
         window.mapReady = true;
-        console.log('Google Maps API loaded');
+        console.log("Google Maps API loaded");
       };
-      window.loadGoogleMapsAPI = function(apiKey) {
-        if (window.mapReady || document.getElementById('google-maps-script')) return;
-        const script = document.createElement('script');
-        script.id = 'google-maps-script';
+      window.loadGoogleMapsAPI = function (apiKey) {
+        if (window.mapReady || document.getElementById("google-maps-script"))
+          return;
+        const script = document.createElement("script");
+        script.id = "google-maps-script";
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry,marker&callback=initMap`;
         script.async = true;
         script.defer = true;
@@ -121,21 +185,32 @@
       const api = new GeminiAPI(wsEndpoint);
       const mapHandler = new MapHandler();
 
-      // Initialize map when Google Maps API is ready
+      // --- Side Panel Accordion ---
+      document.querySelectorAll(".panel-section-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          const sectionId = header.getAttribute("data-toggle");
+          const section = document.getElementById(sectionId);
+          if (section) section.classList.toggle("collapsed");
+        });
+      });
+
+      // --- Side Panel Toggle (mobile) ---
+      document.getElementById("sidePanelToggle").addEventListener("click", () => {
+        document.getElementById("sidePanel").classList.toggle("open");
+      });
+
+      // --- Map Initialization ---
+      // Pass the panel section element so show/hide/toggle controls the accordion
       function tryInitMap() {
         if (window.mapReady) {
-          mapHandler.initialize('map', document.getElementById('mapContainer'));
+          mapHandler.initialize("map", document.getElementById("mapSection"));
         } else {
           setTimeout(tryInitMap, 200);
         }
       }
       tryInitMap();
 
-      // Map toggle button
-      document.getElementById('mapToggleButton').addEventListener('click', () => {
-        mapHandler.toggle();
-      });
-
+      // --- State ---
       let isRecording = false;
       let hasShownSpeakingMessage = false;
       let currentTurn = 0;
@@ -150,10 +225,120 @@
       // Initialize media handler
       mediaHandler.initialize(document.getElementById("videoPreview"));
 
-      // Set up API handlers
+      // --- Connection Status ---
+      function setConnectionStatus(connected) {
+        const dot = document.getElementById("statusDot");
+        const text = document.getElementById("statusText");
+        if (connected) {
+          dot.classList.add("connected");
+          text.textContent = "Connected";
+        } else {
+          dot.classList.remove("connected");
+          text.textContent = "Disconnected";
+        }
+      }
+
+      // --- Helpers ---
+      function getTimestamp() {
+        const now = new Date();
+        return now.toLocaleTimeString("zh-TW", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function createMessageRow(type, content, isInterim) {
+        const row = document.createElement("div");
+        row.className = `message-row ${type}`;
+        if (isInterim) row.classList.add("interim");
+
+        if (type === "user" || type === "gemini") {
+          const avatar = document.createElement("div");
+          avatar.className = `msg-avatar ${type}-avatar`;
+          const avatarIcon = document.createElement("span");
+          avatarIcon.className = "material-symbols-outlined";
+          avatarIcon.textContent = type === "user" ? "person" : "auto_awesome";
+          avatar.appendChild(avatarIcon);
+
+          const body = document.createElement("div");
+          body.className = "msg-body";
+          const msgContent = document.createElement("div");
+          msgContent.className = "msg-content";
+          msgContent.textContent = content;
+          const time = document.createElement("div");
+          time.className = "msg-time";
+          time.textContent = getTimestamp();
+          body.appendChild(msgContent);
+          body.appendChild(time);
+
+          row.appendChild(avatar);
+          row.appendChild(body);
+        } else {
+          const msgContent = document.createElement("div");
+          msgContent.className = "msg-content";
+          msgContent.textContent = content;
+          row.appendChild(msgContent);
+        }
+
+        return row;
+      }
+
+      function createFunctionCard(name, params) {
+        const card = document.createElement("div");
+        card.className = "function-card";
+
+        const header = document.createElement("div");
+        header.className = "function-card-header";
+        header.innerHTML = `
+          <span class="material-symbols-outlined">function</span>
+          <span class="function-card-title">${name}</span>
+          <span class="material-symbols-outlined expand-icon">expand_more</span>
+        `;
+        header.addEventListener("click", () => {
+          card.classList.toggle("expanded");
+        });
+
+        const body = document.createElement("div");
+        body.className = "function-card-body";
+        const pre = document.createElement("pre");
+        pre.textContent = params;
+        body.appendChild(pre);
+
+        card.appendChild(header);
+        card.appendChild(body);
+        return card;
+      }
+
+      function createToolIndicator(text, done) {
+        const el = document.createElement("div");
+        el.className = "tool-indicator" + (done ? " done" : "");
+        const icon = document.createElement("span");
+        icon.className = "material-symbols-outlined";
+        icon.textContent = done ? "check_circle" : "sync";
+        el.appendChild(icon);
+        const span = document.createElement("span");
+        span.textContent = text;
+        el.appendChild(span);
+        return el;
+      }
+
+      function createRouteInfo(text) {
+        const el = document.createElement("div");
+        el.className = "route-info";
+        const icon = document.createElement("span");
+        icon.className = "material-symbols-outlined";
+        icon.textContent = "route";
+        el.appendChild(icon);
+        const span = document.createElement("span");
+        span.textContent = text;
+        el.appendChild(span);
+        return el;
+      }
+
+      // --- API Handlers ---
       api.onReady = (readyMsg) => {
         document.getElementById("micButton").disabled = false;
-        // Dynamically load Google Maps API with key from server
+        setConnectionStatus(true);
         if (readyMsg && readyMsg.maps_js_api_key) {
           window.loadGoogleMapsAPI(readyMsg.maps_js_api_key);
         }
@@ -162,11 +347,11 @@
       api.onAudioData = async (audioData) => {
         try {
           if (!api.isSpeaking || lastAudioTurn !== currentTurn) {
-            logMessage("Gemini: Speaking...");
+            logMessage("gemini-speaking", "Speaking...");
             api.isSpeaking = true;
             lastAudioTurn = currentTurn;
-            document.getElementById("interruptButton").style.display =
-              "inline-block";
+            document.getElementById("interruptButton").style.display = "flex";
+            document.getElementById("sendButton").style.display = "none";
           }
           const arrayBuffer = base64ToArrayBuffer(audioData);
           audioStreamer.addPCM16(new Uint8Array(arrayBuffer));
@@ -178,25 +363,22 @@
 
       api.onTextContent = (text) => {
         if (text.trim()) {
-          logMessage("Gemini: " + text);
+          logMessage("gemini", text);
         }
       };
 
       api.onTurnComplete = () => {
-        logMessage("Gemini: Finished speaking");
-        api.isSpeaking = false; // Reset speaking state
+        logMessage("system", "Finished speaking");
+        api.isSpeaking = false;
         audioStreamer.complete();
         document.getElementById("interruptButton").style.display = "none";
+        document.getElementById("sendButton").style.display = "flex";
 
         // Finalize any remaining transcriptions
         if (currentOutputTranscriptionId && outputTranscriptionBuffer) {
-          console.log(
-            "Finalizing output transcription on turn complete:",
-            outputTranscriptionBuffer
-          );
           logAccumulatedTranscription(
-            `Gemini: ${outputTranscriptionBuffer}`,
-            "gemini-message",
+            outputTranscriptionBuffer,
+            "gemini",
             false,
             "output"
           );
@@ -204,13 +386,9 @@
         }
 
         if (currentInputTranscriptionId && inputTranscriptionBuffer) {
-          console.log(
-            "Finalizing input transcription on turn complete:",
-            inputTranscriptionBuffer
-          );
           logAccumulatedTranscription(
-            `You: ${inputTranscriptionBuffer}`,
-            "user-message",
+            inputTranscriptionBuffer,
+            "user",
             false,
             "input"
           );
@@ -218,140 +396,225 @@
         }
       };
 
-      // Add interruption handler
-      api.onInterrupted = (data) => {
-        logMessage("Gemini: Response interrupted");
+      api.onInterrupted = () => {
         api.isSpeaking = false;
-        audioStreamer.stop(); // Stop current playback and clear queue
+        audioStreamer.stop();
         document.getElementById("interruptButton").style.display = "none";
+        document.getElementById("sendButton").style.display = "flex";
 
-        // Show visual feedback for interruption
-        const messageElement = document.createElement("p");
-        messageElement.className = "interrupted-message";
-        messageElement.textContent = "Response interrupted by user input";
-        output.appendChild(messageElement);
+        const el = document.createElement("div");
+        el.className = "interrupted-message";
+        el.textContent = "Response interrupted";
+        output.appendChild(el);
         output.scrollTop = output.scrollHeight;
       };
 
-      // Add function call and response handlers
       api.onFunctionCall = (data) => {
-        logMessage("Function: " + data.name);
-        logMessage("Parameters: " + JSON.stringify(data.args, null, 2));
+        const card = createFunctionCard(
+          data.name,
+          JSON.stringify(data.args, null, 2)
+        );
+        output.appendChild(card);
+        output.scrollTop = output.scrollHeight;
+
+        // Also update side panel debug
+        const info = document.getElementById("functionInfo");
+        info.innerHTML = `<pre><span class="function-name-display">Function: ${data.name}</span>\n<span class="function-params-display">Parameters: ${JSON.stringify(data.args, null, 2)}</span></pre>`;
       };
 
       api.onFunctionResponse = (data) => {
         const result = data.result || {};
+        const info = document.getElementById("functionInfo");
 
-        // Render map data based on function name
-        if (data.name === 'compute_route' && result.encoded_polyline) {
+        if (data.name === "compute_route" && result.encoded_polyline) {
           mapHandler.drawRoute(
             result.encoded_polyline,
             result.origin_latlng,
             result.destination_latlng
           );
-          logMessage(`Route: ${result.origin} → ${result.destination} | ${result.distance_km} km | ${result.duration_minutes} min`);
+
+          const routeText = `${result.origin} → ${result.destination} | ${result.distance_km} km | ${result.duration_minutes} min`;
+          output.appendChild(createRouteInfo(routeText));
+          output.scrollTop = output.scrollHeight;
+
+          const summaryEl = document.createElement("pre");
+          summaryEl.innerHTML = `<span class="function-response-display">Route: ${routeText}</span>`;
+          info.appendChild(summaryEl);
+        } else if (data.name === "compute_route" && result.error) {
+          // Route computation failed — show error in chat
+          const errRow = createMessageRow("system", `Route error: ${result.error}`);
+          output.appendChild(errRow);
+          output.scrollTop = output.scrollHeight;
         } else if (
-          (data.name === 'search_places_along_route' || data.name === 'search_nearby_places') &&
-          result.places && result.places.length > 0
+          (data.name === "search_places_along_route" ||
+            data.name === "search_nearby_places") &&
+          result.places &&
+          result.places.length > 0
         ) {
           mapHandler.addPlaceMarkers(result.places);
-          const placeNames = result.places.map(p => p.name).join(', ');
-          logMessage(`Found ${result.count} places: ${placeNames}`);
+          mapHandler.show();
+
+          const placeNames = result.places.map((p) => p.name).join(", ");
+          const text = `Found ${result.count} places: ${placeNames}`;
+          output.appendChild(createRouteInfo(text));
+          output.scrollTop = output.scrollHeight;
+
+          const placesEl = document.createElement("pre");
+          placesEl.innerHTML = `<span class="function-response-display">${text}</span>`;
+          info.appendChild(placesEl);
         } else {
-          logMessage("API Response: " + JSON.stringify(data, null, 2));
+          const responseEl = document.createElement("pre");
+          responseEl.innerHTML = `<span class="function-response-display">Response:\n${JSON.stringify(data, null, 2)}</span>`;
+          info.appendChild(responseEl);
         }
       };
 
-      // Add tool use and result handlers
       api.onToolUse = (data) => {
-        logMessage(
-          `🔍 正在執行 ${
-            data.tool === "google_search" ? "Google Search" : data.tool
-          }...`
+        const toolName =
+          data.tool === "google_search" ? "Google Search" : data.tool;
+        output.appendChild(
+          createToolIndicator(`Executing ${toolName}...`, false)
         );
-        logMessage(`執行代碼: ${data.code}`);
+        output.scrollTop = output.scrollHeight;
+
+        const info = document.getElementById("functionInfo");
+        const toolEl = document.createElement("pre");
+        toolEl.innerHTML = `<span class="tool-execution-display">Executing ${toolName}...\nCode: ${data.code}</span>`;
+        info.appendChild(toolEl);
       };
 
       api.onToolResult = (data) => {
-        logMessage(
-          `✅ ${data.tool === "google_search" ? "Google Search" : data.tool}完成`
-        );
+        const toolName =
+          data.tool === "google_search" ? "Google Search" : data.tool;
+        output.appendChild(createToolIndicator(`${toolName} complete`, true));
+        output.scrollTop = output.scrollHeight;
+
+        const info = document.getElementById("functionInfo");
+        const resultEl = document.createElement("pre");
+        resultEl.innerHTML = `<span class="tool-result-display">${toolName} complete</span>`;
+        info.appendChild(resultEl);
       };
 
       api.onInputTranscription = (data) => {
-        console.log("Input transcription callback called with data:", data);
-        // Handle null is_final as interim (not final)
         const isInterim = data.is_final === null || data.is_final === false;
-
         if (isInterim) {
-          // Accumulate transcription text
           inputTranscriptionBuffer += data.text;
-          console.log(
-            "Accumulated input transcription:",
-            inputTranscriptionBuffer
-          );
           logAccumulatedTranscription(
-            `You: ${inputTranscriptionBuffer}`,
-            "user-message",
+            inputTranscriptionBuffer,
+            "user",
             true,
             "input"
           );
         } else {
-          // Final transcription
           inputTranscriptionBuffer += data.text;
-          console.log("Final input transcription:", inputTranscriptionBuffer);
           logAccumulatedTranscription(
-            `You: ${inputTranscriptionBuffer}`,
-            "user-message",
+            inputTranscriptionBuffer,
+            "user",
             false,
             "input"
           );
-          inputTranscriptionBuffer = ""; // Reset buffer
+          inputTranscriptionBuffer = "";
         }
       };
 
       api.onOutputTranscription = (data) => {
-        console.log("Output transcription callback called with data:", data);
-        // Handle null is_final as interim (not final)
         const isInterim = data.is_final === null || data.is_final === false;
-
         if (isInterim) {
-          // Accumulate transcription text
           outputTranscriptionBuffer += data.text;
-          console.log(
-            "Accumulated output transcription:",
-            outputTranscriptionBuffer
-          );
           logAccumulatedTranscription(
-            `Gemini: ${outputTranscriptionBuffer}`,
-            "gemini-message",
+            outputTranscriptionBuffer,
+            "gemini",
             true,
             "output"
           );
         } else {
-          // Final transcription
           outputTranscriptionBuffer += data.text;
-          console.log("Final output transcription:", outputTranscriptionBuffer);
           logAccumulatedTranscription(
-            `Gemini: ${outputTranscriptionBuffer}`,
-            "gemini-message",
+            outputTranscriptionBuffer,
+            "gemini",
             false,
             "output"
           );
-          outputTranscriptionBuffer = ""; // Reset buffer
+          outputTranscriptionBuffer = "";
         }
       };
 
-      // UI Event Handlers
+      // --- Message Logging ---
+      function logMessage(type, content) {
+        if (type === "gemini-speaking") {
+          const row = createMessageRow("gemini", content, false);
+          row.querySelector(".msg-content").style.fontStyle = "italic";
+          row.querySelector(".msg-content").style.opacity = "0.6";
+          output.appendChild(row);
+        } else if (type === "system") {
+          const row = createMessageRow("system", content, false);
+          output.appendChild(row);
+        } else if (type === "gemini") {
+          output.appendChild(createMessageRow("gemini", content, false));
+        } else if (type === "user") {
+          output.appendChild(createMessageRow("user", content, false));
+        }
+        output.scrollTop = output.scrollHeight;
+      }
+
+      function logAccumulatedTranscription(content, type, isInterim, transcriptionType) {
+        const transcriptionId =
+          transcriptionType === "input"
+            ? currentInputTranscriptionId
+            : currentOutputTranscriptionId;
+
+        let row = transcriptionId
+          ? document.getElementById(transcriptionId)
+          : null;
+
+        if (isInterim) {
+          if (!row) {
+            row = createMessageRow(type, content, true);
+            const newId = `transcription-${transcriptionType}-${Date.now()}-${Math.random()
+              .toString(36)
+              .substr(2, 9)}`;
+            row.id = newId;
+
+            if (transcriptionType === "input") {
+              currentInputTranscriptionId = newId;
+            } else {
+              currentOutputTranscriptionId = newId;
+            }
+            output.appendChild(row);
+          } else {
+            const msgContent = row.querySelector(".msg-content");
+            if (msgContent) msgContent.textContent = content;
+          }
+        } else {
+          if (row) {
+            const msgContent = row.querySelector(".msg-content");
+            if (msgContent) msgContent.textContent = content;
+            row.classList.remove("interim");
+            row.classList.add("final");
+          } else {
+            const finalRow = createMessageRow(type, content, false);
+            finalRow.classList.add("final");
+            output.appendChild(finalRow);
+          }
+
+          if (transcriptionType === "input") {
+            currentInputTranscriptionId = null;
+          } else {
+            currentOutputTranscriptionId = null;
+          }
+        }
+
+        output.scrollTop = output.scrollHeight;
+      }
+
+      // --- UI Event Handlers ---
       async function startRecording() {
         try {
-          // If model is speaking, treat this as an interruption
           if (api.isSpeaking) {
             audioStreamer.stop();
             api.isSpeaking = false;
           }
 
-          // Reset input transcription buffer for new recording
           inputTranscriptionBuffer = "";
           currentInputTranscriptionId = null;
 
@@ -362,18 +625,19 @@
 
           audioRecorder.on("data", (base64Data) => {
             if (!hasShownSpeakingMessage) {
-              logMessage("You: Speaking...");
+              logMessage("system", "Listening...");
               hasShownSpeakingMessage = true;
             }
             api.sendAudioChunk(base64Data);
           });
 
           isRecording = true;
-          document.getElementById("micButton").innerHTML =
+          const micBtn = document.getElementById("micButton");
+          micBtn.classList.add("recording");
+          micBtn.innerHTML =
             '<span class="material-symbols-outlined">stop</span>';
         } catch (error) {
           console.error("Error starting recording:", error);
-          logMessage("Error: " + error.message);
         }
       }
 
@@ -381,209 +645,41 @@
         audioRecorder.stop();
         isRecording = false;
         hasShownSpeakingMessage = false;
-        document.getElementById("micButton").innerHTML =
+        const micBtn = document.getElementById("micButton");
+        micBtn.classList.remove("recording");
+        micBtn.innerHTML =
           '<span class="material-symbols-outlined">mic</span>';
-        logMessage("You: Recording stopped.");
+        logMessage("system", "Recording stopped");
 
-        // Stop video streams
         mediaHandler.stopAll();
+        document.getElementById("webcamButton").classList.remove("active");
         document.getElementById("webcamButton").innerHTML =
           '<span class="material-symbols-outlined">videocam</span>';
+        document.getElementById("screenButton").classList.remove("active");
         document.getElementById("screenButton").innerHTML =
           '<span class="material-symbols-outlined">present_to_all</span>';
+
+        // Collapse video section if no video active
+        document.getElementById("videoSection").classList.add("collapsed");
 
         api.sendEndMessage();
         api.isSpeaking = false;
       }
 
-      function logMessage(message) {
-        const messageElement = document.createElement("p");
-
-        // Add specific styling based on message content
-        if (message.startsWith("Function:")) {
-          messageElement.className = "function-name";
-        } else if (message.startsWith("Parameters:")) {
-          messageElement.className = "function-params";
-        } else if (message.startsWith("API Response:")) {
-          messageElement.className = "api-response";
-        } else if (
-          message.startsWith("🔍 正在執行") ||
-          message.startsWith("執行代碼:")
-        ) {
-          messageElement.className = "tool-execution";
-        } else if (
-          message.startsWith("✅") &&
-          (message.includes("完成") || message.includes("搜尋結果:"))
-        ) {
-          messageElement.className = "tool-result";
-        } else if (message.startsWith("Gemini:")) {
-          messageElement.className = "gemini-message";
-        } else if (message.startsWith("You:")) {
-          messageElement.className = "user-message";
-        }
-
-        messageElement.textContent = message;
-        output.appendChild(messageElement);
-        output.scrollTop = output.scrollHeight;
-      }
-
-      function logAccumulatedTranscription(
-        message,
-        className,
-        isInterim,
-        transcriptionType
-      ) {
-        console.log("logAccumulatedTranscription called with:", {
-          message,
-          className,
-          isInterim,
-          transcriptionType,
-        });
-
-        const container = document.getElementById("output");
-        const transcriptionId =
-          transcriptionType === "input"
-            ? currentInputTranscriptionId
-            : currentOutputTranscriptionId;
-
-        // Find existing transcription element by ID
-        let messageElement = transcriptionId
-          ? document.getElementById(transcriptionId)
-          : null;
-
-        if (isInterim) {
-          console.log("Processing interim transcription");
-          if (!messageElement) {
-            console.log("Creating new interim transcription element");
-            messageElement = document.createElement("p");
-            messageElement.className = className + " interim";
-
-            // Generate unique ID for this transcription sequence
-            const newId = `transcription-${transcriptionType}-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`;
-            messageElement.id = newId;
-
-            // Store the ID for future updates
-            if (transcriptionType === "input") {
-              currentInputTranscriptionId = newId;
-            } else {
-              currentOutputTranscriptionId = newId;
-            }
-
-            container.appendChild(messageElement);
-          } else {
-            console.log("Updating existing interim transcription element");
-          }
-          messageElement.textContent = message;
-          console.log("Set interim transcription text to:", message);
-        } else {
-          console.log("Processing final transcription");
-          if (messageElement) {
-            console.log("Finalizing existing transcription element");
-            messageElement.textContent = message;
-            messageElement.classList.remove("interim");
-            messageElement.classList.add("final");
-          } else {
-            console.log("Creating new final transcription element");
-            const finalElement = document.createElement("p");
-            finalElement.className = className + " final";
-            finalElement.textContent = message;
-            container.appendChild(finalElement);
-          }
-
-          // Reset the transcription ID
-          if (transcriptionType === "input") {
-            currentInputTranscriptionId = null;
-          } else {
-            currentOutputTranscriptionId = null;
-          }
-        }
-
-        container.scrollTop = container.scrollHeight;
-        console.log("Accumulated transcription element processed successfully");
-      }
-
-      // Keep the old function for backward compatibility
-      function logTranscription(message, className, isInterim) {
-        console.log("logTranscription called with:", {
-          message,
-          className,
-          isInterim,
-        });
-
-        const container = document.getElementById("output");
-        const interimSelector = `.interim.${className}`;
-        let messageElement = isInterim
-          ? container.querySelector(interimSelector)
-          : null;
-
-        console.log(
-          "Container:",
-          container,
-          "InterimSelector:",
-          interimSelector,
-          "Existing element:",
-          messageElement
-        );
-
-        if (isInterim) {
-          console.log("Processing interim transcription");
-          if (!messageElement) {
-            console.log("Creating new interim element");
-            messageElement = document.createElement("p");
-            messageElement.className = className + " interim";
-            container.appendChild(messageElement);
-          } else {
-            console.log("Using existing interim element");
-          }
-          messageElement.textContent = message;
-          console.log("Set interim element text to:", message);
-        } else {
-          console.log("Processing final transcription");
-          const interimElement = container.querySelector(interimSelector);
-          console.log(
-            "Found interim element for finalization:",
-            interimElement
-          );
-          if (interimElement) {
-            console.log("Updating existing interim element to final");
-            interimElement.textContent = message;
-            interimElement.classList.remove("interim");
-          } else {
-            console.log("Creating new final element");
-            // If a final result comes without an interim one, just log it.
-            const finalElement = document.createElement("p");
-            finalElement.className = className;
-            finalElement.textContent = message;
-            container.appendChild(finalElement);
-          }
-        }
-        container.scrollTop = container.scrollHeight;
-        console.log("Transcription element added/updated successfully");
-      }
-
-      // Add function to send text message
       function sendTextMessage() {
         const textInput = document.getElementById("textInput");
         const text = textInput.value.trim();
         if (!text) return;
 
-        // Clear input
         textInput.value = "";
-
-        // Reset output transcription buffer for new response
         outputTranscriptionBuffer = "";
         currentOutputTranscriptionId = null;
 
-        // Log user message
-        logMessage("You: " + text);
-
-        // Send text message
+        logMessage("user", text);
         api.sendTextMessage(text);
       }
 
-      // Set up button click handlers
+      // Button click handlers
       document.getElementById("micButton").onclick = () => {
         if (isRecording) {
           stopRecording();
@@ -592,28 +688,40 @@
         }
       };
 
-      // Add send button handler
       document.getElementById("sendButton").onclick = sendTextMessage;
 
-      // Add keypress handler for text input
       document
         .getElementById("textInput")
-        .addEventListener("keypress", function (e) {
-          if (e.key === "Enter") {
-            sendTextMessage();
-          }
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") sendTextMessage();
         });
+
+      document.getElementById("interruptButton").onclick = () => {
+        if (api.isSpeaking) {
+          audioStreamer.stop();
+          api.isSpeaking = false;
+          document.getElementById("interruptButton").style.display = "none";
+          document.getElementById("sendButton").style.display = "flex";
+        }
+      };
 
       document.getElementById("webcamButton").onclick = async () => {
         if (mediaHandler.isWebcamActive) {
           mediaHandler.stopAll();
+          document.getElementById("webcamButton").classList.remove("active");
           document.getElementById("webcamButton").innerHTML =
             '<span class="material-symbols-outlined">videocam</span>';
+          document.getElementById("videoSection").classList.add("collapsed");
         } else {
           const success = await mediaHandler.startWebcam();
           if (success) {
+            document.getElementById("webcamButton").classList.add("active");
             document.getElementById("webcamButton").innerHTML =
               '<span class="material-symbols-outlined">videocam_off</span>';
+            // Expand video section
+            document
+              .getElementById("videoSection")
+              .classList.remove("collapsed");
             mediaHandler.startFrameCapture((base64Image) => {
               api.sendImage(base64Image);
             });
@@ -624,94 +732,25 @@
       document.getElementById("screenButton").onclick = async () => {
         if (mediaHandler.isScreenActive) {
           mediaHandler.stopAll();
+          document.getElementById("screenButton").classList.remove("active");
           document.getElementById("screenButton").innerHTML =
             '<span class="material-symbols-outlined">present_to_all</span>';
+          document.getElementById("videoSection").classList.add("collapsed");
         } else {
           const success = await mediaHandler.startScreenShare();
           if (success) {
+            document.getElementById("screenButton").classList.add("active");
             document.getElementById("screenButton").innerHTML =
               '<span class="material-symbols-outlined">cancel_presentation</span>';
+            document
+              .getElementById("videoSection")
+              .classList.remove("collapsed");
             mediaHandler.startFrameCapture((base64Image) => {
               api.sendImage(base64Image);
             });
           }
         }
       };
-
-      // Add CSS for interrupted message and transcription states
-      const style = document.createElement("style");
-      style.textContent = `
-      .interrupted-message {
-        color: #ff6b6b;
-        font-style: italic;
-        margin: 4px 0;
-        padding: 4px 8px;
-        border-left: 3px solid #ff6b6b;
-        background-color: rgba(255, 107, 107, 0.1);
-      }
-      
-      /* Transcription styles */
-      .interim {
-        color: #999;
-        font-style: italic;
-        opacity: 0.8;
-        position: relative;
-      }
-      
-      .interim::after {
-        content: '...';
-        animation: blink 1s infinite;
-      }
-      
-      .final {
-        color: inherit;
-        font-style: normal;
-        opacity: 1;
-      }
-      
-      .user-message.interim {
-        color: #666;
-      }
-      
-      .gemini-message.interim {
-        color: #8e44ad;
-      }
-      
-      .user-message.final {
-        color: #333;
-      }
-      
-      .gemini-message.final {
-        color: #6200ee;
-      }
-      
-      @keyframes blink {
-        0%, 50% { opacity: 1; }
-        51%, 100% { opacity: 0; }
-      }
-      
-      /* Tool execution styles */
-      .tool-execution {
-        color: #2196F3;
-        font-style: italic;
-        margin: 4px 0;
-        padding: 8px 12px;
-        border-left: 3px solid #2196F3;
-        background-color: rgba(33, 150, 243, 0.1);
-        border-radius: 4px;
-      }
-      
-      .tool-result {
-        color: #4CAF50;
-        margin: 4px 0;
-        padding: 8px 12px;
-        border-left: 3px solid #4CAF50;
-        background-color: rgba(76, 175, 80, 0.1);
-        border-radius: 4px;
-        font-weight: 500;
-      }
-    `;
-      document.head.appendChild(style);
     </script>
   </body>
 </html>

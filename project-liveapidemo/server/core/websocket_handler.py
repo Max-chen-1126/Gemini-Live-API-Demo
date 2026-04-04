@@ -159,7 +159,7 @@ async def handle_client_messages(websocket: Any, session: SessionState) -> None:
                         logger.info("Sending image to Gemini...")
                         image_bytes = base64.b64decode(data.get("data"))
                         await session.genai_session.send_realtime_input(
-                            media=types.Blob(
+                            video=types.Blob(
                                 data=image_bytes,
                                 mime_type="image/jpeg",
                             )
