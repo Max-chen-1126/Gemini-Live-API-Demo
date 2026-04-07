@@ -77,7 +77,7 @@ MAPS_FUNCTION_DECLARATIONS = {
     "function_declarations": [
         {
             "name": "compute_route",
-            "description": "規劃從起點到目的地的路線。當使用者提到想去某個地方時呼叫此功能，取得距離、時間和路線資訊。",
+            "description": "規劃從起點到目的地的路線。當使用者提到想去某個地方、詢問路線、距離、時間、怎麼去、怎麼走時，必須呼叫此工具取得距離、時間和路線資訊。絕不可自行編造路線數據。",
             "parameters": {
                 "type": "OBJECT",
                 "properties": {

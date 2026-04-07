@@ -167,12 +167,8 @@ async def handle_client_messages(websocket: Any, session: SessionState) -> None:
                         logger.info("Image sent to Gemini")
                     elif data["type"] == "text":
                         logger.info("Sending text to Gemini...")
-                        await session.genai_session.send_client_content(
-                            turns=types.Content(
-                                parts=[types.Part(text=data.get("data"))],
-                                role="user",
-                            ),
-                            turn_complete=True,
+                        await session.genai_session.send_realtime_input(
+                            text=data.get("data"),
                         )
                         logger.info("Text sent to Gemini")
                     elif data["type"] == "end":
